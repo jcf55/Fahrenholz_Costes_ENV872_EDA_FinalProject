@@ -7,7 +7,7 @@ output:
 geometry: margin=2.54cm
 title: "Insert title of project here"
 subtitle: "Web address for GitHub repository"
-author: "Name"
+author: "Lydie Costes and Jackie Fahrenholz"
 fontsize: 12pt
 mainfont: Times New Roman
 
@@ -23,14 +23,18 @@ mainfont: Times New Roman
 
 ```{r setup, include=FALSE}
 # Set your working directory
-
+setwd("C:/Users/Jackie/Desktop/ENV872/EDAFinalProject")
 # Load your packages
-
-# Set your ggplot theme
-
+library(tidyverse)
+library(lubridate)
+# Set your ggplot theme - Lydie please feel free to make this more fun :0)
+ourtheme <- theme_classic(base_size = 12) +
+  theme(axis.text = element_text(color = "black"),
+        legend.position = "right")
 # Load your datasets
-
+birds <- read.csv("../Data/Raw/avian_ssd_jan07.csv")
 ```
+
 
 
 # Rationale and Research Questions
@@ -46,8 +50,28 @@ mainfont: Times New Roman
 \newpage
 
 # Exploratory Analysis 
+```{r explore the data}
+#dimensions
+dim(birds)
+#column names
+colnames(birds)
+#variable types?
+str(birds)
+#look at the first few lines
+head(birds)
 
+```
 
+```{r wrangle the data}
+#we should ask where this should go, or if it doesn't need to be shown we can just add this to the chunk above
+
+#columns to keep- i'm thinking we choose the scientific name and a few variables
+#leave out the unsexed things because a lot of that is -999
+#I don't think we need the species number or subspecies it seems repetitive
+birds.wrangle <-
+  birds %>%
+  select()
+```
 
 \newpage
 
