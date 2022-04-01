@@ -22,17 +22,24 @@ mainfont: Times New Roman
 \newpage
 
 ```{r setup, include=FALSE}
-# Set your working directory
-setwd("C:/Users/Jackie/Desktop/ENV872/EDAFinalProject")
-# Load your packages
+# Get working directory
+getwd()
+
+# Load packages
 library(tidyverse)
 library(lubridate)
-# Set your ggplot theme - Lydie please feel free to make this more fun :0)
+library(GGally)
+
+# Set your ggplot theme
 ourtheme <- theme_classic(base_size = 12) +
   theme(axis.text = element_text(color = "black"),
         legend.position = "right")
-# Load your datasets
+
+# Load datasets
 birds <- read.csv("../Data/Raw/avian_ssd_jan07.csv")
+
+# Set digit notation
+options(scipen = 10)
 ```
 
 
@@ -60,17 +67,63 @@ str(birds)
 #look at the first few lines
 head(birds)
 
+# Should this section go before or after the wrangling below?
+
 ```
 
 ```{r wrangle the data}
-#we should ask where this should go, or if it doesn't need to be shown we can just add this to the chunk above
+# Convert -999 to NAs and add genus column
+birds <- birds %>%
+  na_if(., -999) %>%
+  separate(Species_name, 
+           sep = " ", 
+           into = c("Genus", "Sp"), 
+           remove = FALSE)
 
-#columns to keep- i'm thinking we choose the scientific name and a few variables
-#leave out the unsexed things because a lot of that is -999
-#I don't think we need the species number or subspecies it seems repetitive
-birds.wrangle <-
-  birds %>%
-  select()
+# Subset to columns we are interested in
+birds.subset <- birds %>%
+  select(Family, Species_name, Genus, 
+         M_mass, F_mass,
+         M_bill, F_bill,
+         M_tail, F_tail,
+         Clutch_size, Mating_System, Display, Resource)
+
+# Alternate option that keeps most columns
+# birds.subset <- birds %>%
+#   select(-Sp, -English_name, -Subspecies, 
+#          -unsexed_mass, -unsexed_mass_N,
+#          -Unsexed_wing, -Unsexed_wing_N,
+#          -Unsexed_tarsus, -Unsexed_tarsus_N,
+#          -Unsexed_bill, -Unsexed_bill_N,
+#          -Unsexed_tail, -Unsexed_tail_N,
+#          -References)
+
+# I realized all the columns ending in "N" are sample sizes.. so 
+# we don't need to include them for analyses but might want to 
+# include and sum them (and then maybe exclude genera or families 
+# that have a tiny sample size)
+
+# This function allows calculation of mode for categorical variables
+Mode <- function(x) {
+  ux <- unique(x) 
+  ux[which.max(tabulate(match(x, ux)))]
+}
+
+# Group by family, average by mean or mode
+birds.family <- birds.subset %>%
+  group_by(Family) %>%
+  summarise(M_mass = mean(M_mass, na.rm = TRUE), 
+            F_mass = mean(F_mass, na.rm = TRUE),
+            M_bill = mean(M_bill, na.rm = TRUE), 
+            F_bill = mean(F_bill, na.rm = TRUE),
+            M_tail = mean(M_tail, na.rm = TRUE), 
+            F_tail = mean(F_tail, na.rm = TRUE),
+            Clutch_size = mean(Clutch_size, na.rm = TRUE),
+            Common_Mating_System = Mode(Mating_System),
+            Common_Display = Mode(Display),
+            Common_Resource = Mode(Resource))
+
+
 ```
 
 \newpage
@@ -79,11 +132,40 @@ birds.wrangle <-
 
 
 
-## Question 1: <insert specific question here and add additional subsections for additional questions below, if needed>
+## Question 1: Does female mass predict clutch size?
 
 ## Question 2: 
 
+```{r more_exploration}
+# View variable distributions and relationships
+ggpairs(birds.subset[,c(1,4:13)])
+ggpairs(birds.family)
 
+# Looks like there might be a relationship between tail length and clutch size
+# Does female size predict clutch size?
+summary(with(birds.subset, lm(Clutch_size ~ F_tail)))
+# Yes! But doesn't explain much variation. 
+# p < 0.001, R2 = 0.016
+ggplot(birds.subset, aes(x = F_tail, y = Clutch_size)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = F, color = "seagreen4")
+
+# Now weight and clutch size
+# Verify that male and female mass are highly correlated
+summary(with(birds.subset, lm(M_mass ~ F_mass)))
+# They are: p < 0.001, R2 = 0.982. 
+# Maybe use female size since females lay eggs
+
+# Does female size predict clutch size?
+summary(with(birds.subset, lm(Clutch_size ~ F_mass)))
+# Not at all! p = 0.958, R2 < 0.001
+ggplot(birds.subset, aes(x = F_mass, y = Clutch_size)) +
+  geom_point(aes(color = Family)) +
+  xlim(0,12000) 
+# I think we have too many families for coloring by family to be meaningful
+# Figure out a different way to visualize groupings
+
+```
 
 
 \newpage
