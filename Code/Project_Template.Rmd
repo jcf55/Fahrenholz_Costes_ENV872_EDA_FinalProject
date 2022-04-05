@@ -5,8 +5,8 @@ output:
     fig_caption: yes
     number_sections: yes
 geometry: margin=2.54cm
-title: "Insert title of project here"
-subtitle: "Web address for GitHub repository"
+title: "Comparison of Avian Clutch Size, Physical Characterists, and Mating Tactics"
+subtitle: "https://github.com/jcf55/Fahrenholz_Costes_ENV872_EDA_FinalProject"
 author: "Lydie Costes and Jackie Fahrenholz"
 fontsize: 12pt
 mainfont: Times New Roman
@@ -42,17 +42,24 @@ birds <- read.csv("../Data/Raw/avian_ssd_jan07.csv")
 options(scipen = 10)
 ```
 
-
-
 # Rationale and Research Questions
 
-
+According to the study from which this data was extracted, avian body size and their evolution over time there is much to be debated. Generally, there is agreement about the idea that body size of bird species impacts other characteristics. Because of this, this project intends to explore the correlation between body size of avian species with various measurements and observations in this dataset. First, we ask the question if female tail size predicts clutch size. Tail length has a significant impact on control and agility (Evans 1999). Longer tails increase crash risk as well as reduces the ability to maneuver (Evans 1999). We believe that this may have an overall negative impact on clutch size, as birds with longer tail lengths may be less efficient at collecting food for their young. To follow this analysis, we will explore tail length variation in comparison with methods of display, mating system, and resource sharing systems. 
 
 \newpage
 
 # Dataset Information
 
+Our dataset consists of data that was collected starting in 2005 and was last updated in January of 2007. Data for this collection come from regions that include:
 
+* Western Palearctic
+* Neararctic
+* Africa
+* Australia
+* New Zealand
+* Antarctica
+
+The complete dataset (represented below by the variable `birds`) includes 41 variables, and represents 146 families. According to the metadata, the majority of this information was gathered from ornithological handbooks, with some data obtained from personal communications with authors who published information on species bird groups. More information on the sources used can be found at: https://esapubs.org/archive/ecol/E088/096/metadata.htm (also in Data/Raw in the .tex file) 
 
 \newpage
 
@@ -67,7 +74,7 @@ str(birds)
 #look at the first few lines
 head(birds)
 
-# Should this section go before or after the wrangling below?
+# Should this section go before or after the wrangling below? - I asked this on slack but I'm thinking we should have it after we get the birds.family dataset
 
 ```
 
@@ -81,12 +88,10 @@ birds <- birds %>%
            remove = FALSE)
 
 # Subset to columns we are interested in
-birds.subset <- birds %>%
-  select(Family, Species_name, Genus, 
-         M_mass, F_mass,
-         M_bill, F_bill,
-         M_tail, F_tail,
-         Clutch_size, Mating_System, Display, Resource)
+birds.subset <- birds %>% #without changing the Family variable below I had errors
+  select(ï..Family, Species_name, Genus, F_mass, F_bill,
+          F_tail,Clutch_size, Mating_System, Display, 
+          Resource)
 
 # Alternate option that keeps most columns
 # birds.subset <- birds %>%
@@ -111,30 +116,32 @@ Mode <- function(x) {
 
 # Group by family, average by mean or mode
 birds.family <- birds.subset %>%
-  group_by(Family) %>%
-  summarise(M_mass = mean(M_mass, na.rm = TRUE), 
-            F_mass = mean(F_mass, na.rm = TRUE),
-            M_bill = mean(M_bill, na.rm = TRUE), 
+  group_by(ï..Family) %>% #changed Family name to match what is in data
+  summarise(F_mass = mean(F_mass, na.rm = TRUE),
             F_bill = mean(F_bill, na.rm = TRUE),
-            M_tail = mean(M_tail, na.rm = TRUE), 
             F_tail = mean(F_tail, na.rm = TRUE),
             Clutch_size = mean(Clutch_size, na.rm = TRUE),
             Common_Mating_System = Mode(Mating_System),
             Common_Display = Mode(Display),
-            Common_Resource = Mode(Resource))
-
-
+            Common_Resource = Mode(Resource)) %>%
+  filter(!is.na(Clutch_size), !is.na(Common_Mating_System),
+         !is.na(Common_Display), !is.na(Common_Resource), 
+         !is.na(F_tail), !is.na(F_mass), !is.na(F_bill))
 ```
 
 \newpage
 
 # Analysis
 
+To test our hypotheses using our subset data `birds.family`, we will conduct a linear regression and an analysis of variance (ANOVA). Our first research question will be answered using a linear regression, while our second will be addressed with an ANOVA. Results will be clearly stated in words, and supplemented using graphing visualizations. 
 
+## Question 1: Does female tail length predict clutch size?
+$H_0$ : There is no significant difference between female tail length and clutch size.
+$H_A$ : There is a significant difference between female tail length and clutch size.
 
-## Question 1: Does female mass predict clutch size?
-
-## Question 2: 
+## Question 2: Does female tail length predict mating approaches?
+$H_0$ : There is no significant impact of mating approaches on clutch size
+$H_A$ : There is a significant impact of mating approaches on clutch size. 
 
 ```{r more_exploration}
 # View variable distributions and relationships
@@ -146,9 +153,12 @@ ggpairs(birds.family)
 summary(with(birds.subset, lm(Clutch_size ~ F_tail)))
 # Yes! But doesn't explain much variation. 
 # p < 0.001, R2 = 0.016
-ggplot(birds.subset, aes(x = F_tail, y = Clutch_size)) +
+#how do we get this plot to not be continuous? change family to chr from int?
+ggplot(birds.subset, aes(x = F_tail, y = Clutch_size, color = ï..Family)) +
   geom_point() +
   geom_smooth(method = "lm", se = F, color = "seagreen4")
+
+####### i think that we will only need the stuff above here what do you think?##
 
 # Now weight and clutch size
 # Verify that male and female mass are highly correlated
@@ -176,4 +186,5 @@ ggplot(birds.subset, aes(x = F_mass, y = Clutch_size)) +
 \newpage
 
 # References
-<add references here if relevant, otherwise delete this section> 
+
+Evans, M.R. 1999. The consequences of flight for the evolution of tail ornaments in birds. In: Adams, N.J. & Slotow, R.H. (eds) Proc. 22 Int. Ornithol. Congr., Durban: 1823-1843. Johannesburg: BirdLife South Africa.

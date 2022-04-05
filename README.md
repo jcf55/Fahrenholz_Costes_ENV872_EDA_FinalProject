@@ -12,7 +12,8 @@
 <describe the purpose of this repository, the information it contains, and any relevant analysis goals. What, why, where, when, how?>
 
 This repository holds the contents related to a Duke Nicholas School of the Environment course titled Environmental Data Analytics. The course was taught during the Spring of 2022, in which this was created. Within it are raw, and processed data files used for analysis of our research questions related to bird data found on an open-source websites. The creators of this repository are in no way connected to the creation of the data set, please see the metadata files for more information and websites.
-* add about analysis goals, how we got, what we did etc
+
+Our analysis intends to identify some of the trends found within the avian families maintained for analysis. Within this field of study there is a lot of interest related to avian body size and the impacts this has on other characteristics of a species. Ultimately, we are using clutch size as an indicator for whether or not there is a relationship between the variables of interest. To achieve this, linear regressions and ANOVA were conducted to answer the two research questions that are explored throughout this project.
 
 
 ## Investigators
@@ -24,7 +25,7 @@ Lydie Costes, lydie.costes@duke.edu
 
 <add relevant keywords here>
 
-birds, mating, clutchsize
+birds, mating system, clutch-size, avian mass
 
 
 ## Database Information
@@ -38,22 +39,64 @@ This data set was found using www.ecologicaldata.org, an open source website for
 
 <describe the folders contained in the repository, including what type of files they contain>
 
-The folders contained within our repository split up our Code and our Data. In the project folder, a README.md file can be found, as seen on our GitHub repository page. The Code folder contains the R scripts used to complete analyses to answer our over arching research questions. The Data folder contains the original data set (Raw folder) and our wrangled data sets (Processed folder).
+The folders contained within our repository split up our Code and our Data. The Code folder contains the R scripts used to complete analyses to answer our over arching research questions. The Data folder contains the original data set (Raw folder) and our wrangled data sets (Processed folder).
 
 <describe the formats of files for the various purposes contained in the repository>
 
-Files within our folders were kept only if relevant to avoid cluttering up our work space. The README.md file is set up to explain the data and analysis conducted within this project. Our .Rproj file created the workspace in which we worked through creating our final report. Code files were all written using RStudio and are therefore in .Rmd for easy sharing. Our project template is where analysis was conducted, while the project instructions .Rmd provided guidance for the project at large. 
+Files within our folders were kept only if relevant to avoid cluttering up our work space. Our `.Rproj` file created the workspace in which we worked through creating our final report. Code files were all written using RStudio and are therefore in `.Rmd` for easy sharing. Our project template is where analysis was conducted, while the project instructions .Rmd provided guidance for the project at large. 
 
 <describe your file naming conventions>
 
-Files are named conventionally, using the original file name for our raw data set that is associated with the .txt file in the Data/Raw folder. Processed data is named to distinguish it between the raw dataset and all file names will be explanatory as to the contents held within the file. 
+Files are named conventionally, using the original file name for our raw data set that is associated with the `.txt` file in the Data/Raw folder. Processed data is named to distinguish it between the raw dataset and all file names will be explanatory as to the contents held within the file. 
+
 ## Metadata
 
 <For each data file in the repository, describe the data contained in each column. Include the column name, a description of the information, the class of data, and any units associated with the data. Create a list or table for each data file.> 
 
+Data contained in the Raw folder, consists of a total of 41 variables, and 146 avian families. Information about each of these variables can be found in the .tex file within the Raw data folder.
+
+For our wrangled data, located in the Processed folder, 8 were maintained, along with 11 families. Not all families were kept to simplify visualizations as 146 is overwhelming. Families were chosen by filtering out all incomplete instances of data in explanatory variables. Variables maintained with the processed data include and are defined below:
+
+|Column Name           | Description                | Class   | Units |
+|--------------------  | -------------------------- | ------- | ----- |
+|  Family              | Family Number              | integer | NA    |
+|  F_mass              | Female Mass                | number  | grams |
+|  F_bill              | Female Bill Length         | number  | mm    |
+|  F_tail              | Female Tail Length         | number  | mm    |
+| Clutch_size          | Average # of eggs          | number  | NA    |
+| Common_Mating_System | Score of system            | integer | NA    |
+| Common_Display       | Score of display agility   | integer | NA    |
+| Common_Resource      | Score of territoriality &  | integer | NA    |
+|                      |  inter-mate sharing        |         |       |
+
+### Scores defined
+
+Scoring for each system is created as follow:
+
+~Mating System~
+* 1: polyandry
+* 2: monogamy
+* 3: mostly monogamy, occasional polygyny
+* 4: mostly polygyny
+* 5: lek or promiscuous
+
+~Common Display~
+* 1: ground displays only, including displays on trees and bushes
+* 2: ground displays, but with occasional jumps/leaps into the air
+* 3: both ground and non-acrobatic flight displays
+* 4: mainly aerial displays, non-acrobatic 
+* 5: mainly aerial displays, acrobatic
+
+~Common Resource~
+* 0: males and females don't share resources and they feed away from their breeding territory
+* 1: males and females share resources on their territory only during the breeding season
+* 2: males and females share resources on their territory all year round
+
 ## Scripts and code
 
 <list any software scripts/code contained in the repository and a description of their purpose.>
+
+Within this repository, you will find a `Project_Template.Rmd` which includes all the code used to wrangle, visualize, and evaluate our research questions. This `.Rmd` file can be found within the Code folder. 
 
 ## Quality assurance/quality control
 
