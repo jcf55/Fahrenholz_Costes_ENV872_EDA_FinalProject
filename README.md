@@ -1,11 +1,5 @@
-# PROJECT TITLE HERE
+# Comparison of Avian Clutch Size, Physical Characterists, and Mating Tactics
 # ENV872: EDA Final Project
-
-# 
-
-<General notes: add as much information as is relevant for your repository. Some overarching guidelines are provided, but feel free to expand on these guidelines.>
-<More resources found here: https://www.dataone.org/all-best-practices>
-<Delete the text inside the brackets when formatting your file.>
 
 ## Summary
 
@@ -18,8 +12,8 @@ Our analysis intends to identify some of the trends found within the avian famil
 
 ## Investigators
 
-Jackie Fahrenholz, jacqueline.fahrenholz@duke.edu
-Lydie Costes, lydie.costes@duke.edu
+* Lydie Costes, lydie.costes@duke.edu
+* Jackie Fahrenholz, jacqueline.fahrenholz@duke.edu
 
 ## Keywords
 
@@ -55,7 +49,7 @@ Files are named conventionally, using the original file name for our raw data se
 
 Data contained in the Raw folder, consists of a total of 41 variables, and 146 avian families. Information about each of these variables can be found in the .tex file within the Raw data folder.
 
-For our wrangled data, located in the Processed folder, 8 were maintained, along with 11 families. Not all families were kept to simplify visualizations as 146 is overwhelming. Families were chosen by filtering out all incomplete instances of data in explanatory variables. Variables maintained with the processed data include and are defined below:
+For our wrangled data, located in the Processed folder, 8 variables were maintained, along with 11 families of avian species. Not all families were kept to simplify visualizations as 146 is overwhelming. Families were chosen by filtering out all incomplete instances of data in explanatory variables. Variables maintained with the processed data include and are defined below:
 
 |Column Name           | Description                | Class   | Units |
 |--------------------  | -------------------------- | ------- | ----- |
@@ -66,28 +60,31 @@ For our wrangled data, located in the Processed folder, 8 were maintained, along
 | Clutch_size          | Average # of eggs          | number  | NA    |
 | Common_Mating_System | Score of system            | integer | NA    |
 | Common_Display       | Score of display agility   | integer | NA    |
-| Common_Resource      | Score of territoriality &  | integer | NA    |
-|                      |  inter-mate sharing        |         |       |
+| Common_Resource      | Score of territoriality & inter-mate sharing  | integer | NA    |
+                         
 
 ### Scores defined
 
 Scoring for each system is created as follow:
 
-~Mating System~
+_Mating System_
+
 * 1: polyandry
 * 2: monogamy
 * 3: mostly monogamy, occasional polygyny
 * 4: mostly polygyny
 * 5: lek or promiscuous
 
-~Common Display~
+_Common Display_
+
 * 1: ground displays only, including displays on trees and bushes
 * 2: ground displays, but with occasional jumps/leaps into the air
 * 3: both ground and non-acrobatic flight displays
 * 4: mainly aerial displays, non-acrobatic 
 * 5: mainly aerial displays, acrobatic
 
-~Common Resource~
+_Common Resource_
+
 * 0: males and females don't share resources and they feed away from their breeding territory
 * 1: males and females share resources on their territory only during the breeding season
 * 2: males and females share resources on their territory all year round

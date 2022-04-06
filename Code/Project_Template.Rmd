@@ -64,7 +64,7 @@ The complete dataset (represented below by the variable `birds`) includes 41 var
 \newpage
 
 # Exploratory Analysis 
-```{r explore the data}
+```{r explore_the_full_data}
 #dimensions
 dim(birds)
 #column names
@@ -74,11 +74,11 @@ str(birds)
 #look at the first few lines
 head(birds)
 
-# Should this section go before or after the wrangling below? - I asked this on slack but I'm thinking we should have it after we get the birds.family dataset
+# I think it's fair that this goes here and then we do it again? Explore, wrangle, re-explore?
 
 ```
 
-```{r wrangle the data}
+```{r wrangle_the_data}
 # Convert -999 to NAs and add genus column
 birds <- birds %>%
   na_if(., -999) %>%
@@ -92,7 +92,7 @@ birds.subset <- birds %>% #without changing the Family variable below I had erro
   select(ï..Family, Species_name, Genus, F_mass, F_bill,
           F_tail,Clutch_size, Mating_System, Display, 
           Resource)
-
+# I don't think we will need this one anymore! 
 # Alternate option that keeps most columns
 # birds.subset <- birds %>%
 #   select(-Sp, -English_name, -Subspecies, 
@@ -127,8 +127,19 @@ birds.family <- birds.subset %>%
   filter(!is.na(Clutch_size), !is.na(Common_Mating_System),
          !is.na(Common_Display), !is.na(Common_Resource), 
          !is.na(F_tail), !is.na(F_mass), !is.na(F_bill))
+
+#write the csv file into our Processed data folder
+write.csv(birds.family, file = "../Data/Processed/birds_wrangled.csv")
 ```
 
+```{r more_exploration}
+#let's look at the data again, make sure it looks good
+dim(birds.family)
+colnames(birds.family)
+
+# View variable distributions and relationships
+ggpairs(birds.family)
+```
 \newpage
 
 # Analysis
@@ -139,23 +150,15 @@ To test our hypotheses using our subset data `birds.family`, we will conduct a l
 $H_0$ : There is no significant difference between female tail length and clutch size.
 $H_A$ : There is a significant difference between female tail length and clutch size.
 
-## Question 2: Does female tail length predict mating approaches?
-$H_0$ : There is no significant impact of mating approaches on clutch size
-$H_A$ : There is a significant impact of mating approaches on clutch size. 
-
-```{r more_exploration}
-# View variable distributions and relationships
-ggpairs(birds.subset[,c(1,4:13)])
-ggpairs(birds.family)
-
+```{r question_1_exploration}
 # Looks like there might be a relationship between tail length and clutch size
 # Does female size predict clutch size?
 summary(with(birds.subset, lm(Clutch_size ~ F_tail)))
 # Yes! But doesn't explain much variation. 
 # p < 0.001, R2 = 0.016
 #how do we get this plot to not be continuous? change family to chr from int?
-ggplot(birds.subset, aes(x = F_tail, y = Clutch_size, color = ï..Family)) +
-  geom_point() +
+ggplot(birds.subset, aes(x = F_tail, y = Clutch_size)) +
+  geom_point(aes(color = ï..Family)) +
   geom_smooth(method = "lm", se = F, color = "seagreen4")
 
 ####### i think that we will only need the stuff above here what do you think?##
@@ -177,6 +180,28 @@ ggplot(birds.subset, aes(x = F_mass, y = Clutch_size)) +
 
 ```
 
+## Question 2: Does female tail length predict mating approaches?
+$H_0$ : There is no significant impact of mating approaches on clutch size
+$H_A$ : There is a significant impact of mating approaches on clutch size.
+
+```{r question_2}
+##### we probably want to revisit this because it looks like nothing is significant ####
+#test for normality
+shapiro.test() #this was giving me issues and I'm sure it's just something silly that I was doing
+qqnorm(birds.family$F_tail); qqline(birds.family$F_tail)
+
+#test for equal variance; this is the only testable variable
+#common_display is all in the same group, and common_mating is consistent == 2
+bartlett.test(birds.family$F_tail ~ birds.family$Common_Resource)
+
+#form the anova
+mating.anova <- aov(data = birds.family, F_tail ~ Common_Mating_System*Common_Display*Common_Resource)
+summary(mating.anova)
+plot(mating.anova)
+
+mating.anova2 <- aov(data = birds.family, F_tail ~ Common_Display + Common_Resource)
+summary(mating.anova2)
+```
 
 \newpage
 
