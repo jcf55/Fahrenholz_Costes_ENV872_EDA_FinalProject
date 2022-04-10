@@ -10,7 +10,8 @@ subtitle: "https://github.com/jcf55/Fahrenholz_Costes_ENV872_EDA_FinalProject"
 author: "Lydie Costes and Jackie Fahrenholz"
 fontsize: 12pt
 mainfont: Times New Roman
-
+editor_options: 
+  chunk_output_type: console
 ---
 
 \newpage
@@ -27,13 +28,13 @@ getwd()
 
 # Load packages
 library(tidyverse)
-library(lubridate)
 library(GGally)
 
 # Set your ggplot theme
-ourtheme <- theme_classic(base_size = 12) +
+ourtheme <- theme_bw(base_size = 12) +
   theme(axis.text = element_text(color = "black"),
-        legend.position = "right")
+        legend.position = "top")
+theme_set(ourtheme)
 
 # Load datasets
 birds <- read.csv("../Data/Raw/avian_ssd_jan07.csv")
@@ -74,8 +75,6 @@ str(birds)
 #look at the first few lines
 head(birds)
 
-# I think it's fair that this goes here and then we do it again? Explore, wrangle, re-explore?
-
 ```
 
 ```{r wrangle_the_data}
@@ -88,25 +87,10 @@ birds <- birds %>%
            remove = FALSE)
 
 # Subset to columns we are interested in
-birds.subset <- birds %>% #without changing the Family variable below I had errors
-  select(ï..Family, Species_name, Genus, F_mass, F_bill,
+birds.subset <- birds %>%
+  select(Family, Species_name, Genus, F_mass, F_bill,
           F_tail,Clutch_size, Mating_System, Display, 
           Resource)
-# I don't think we will need this one anymore! 
-# Alternate option that keeps most columns
-# birds.subset <- birds %>%
-#   select(-Sp, -English_name, -Subspecies, 
-#          -unsexed_mass, -unsexed_mass_N,
-#          -Unsexed_wing, -Unsexed_wing_N,
-#          -Unsexed_tarsus, -Unsexed_tarsus_N,
-#          -Unsexed_bill, -Unsexed_bill_N,
-#          -Unsexed_tail, -Unsexed_tail_N,
-#          -References)
-
-# I realized all the columns ending in "N" are sample sizes.. so 
-# we don't need to include them for analyses but might want to 
-# include and sum them (and then maybe exclude genera or families 
-# that have a tiny sample size)
 
 # This function allows calculation of mode for categorical variables
 Mode <- function(x) {
@@ -116,7 +100,7 @@ Mode <- function(x) {
 
 # Group by family, average by mean or mode
 birds.family <- birds.subset %>%
-  group_by(ï..Family) %>% #changed Family name to match what is in data
+  group_by(Family) %>% 
   summarise(F_mass = mean(F_mass, na.rm = TRUE),
             F_bill = mean(F_bill, na.rm = TRUE),
             F_tail = mean(F_tail, na.rm = TRUE),
@@ -129,16 +113,27 @@ birds.family <- birds.subset %>%
          !is.na(F_tail), !is.na(F_mass), !is.na(F_bill))
 
 #write the csv file into our Processed data folder
-write.csv(birds.family, file = "../Data/Processed/birds_wrangled.csv")
+#write.csv(birds.subset, file = "./Data/Processed/birds_subset.csv")
+#write.csv(birds.family, file = "./Data/Processed/birds_wrangled.csv")
 ```
 
 ```{r more_exploration}
-#let's look at the data again, make sure it looks good
+# Work now from the processed file
+birds.subset <- read_csv("./Data/Processed/birds_subset.csv")
+
+# Set Family as a factor
+birds.subset$Family <- as.factor(birds.subset$Family)
+
+# Look at the data again, make sure it looks good
 dim(birds.family)
 colnames(birds.family)
 
 # View variable distributions and relationships
 ggpairs(birds.family)
+
+# View the counts of our factor variables
+count(birds.subset, vars = Mating_System) # SUPER uneven! This could be an issue contributing to uneven variances?
+count(birds.subset, vars = Display)
 ```
 \newpage
 
@@ -146,61 +141,80 @@ ggpairs(birds.family)
 
 To test our hypotheses using our subset data `birds.family`, we will conduct a linear regression and an analysis of variance (ANOVA). Our first research question will be answered using a linear regression, while our second will be addressed with an ANOVA. Results will be clearly stated in words, and supplemented using graphing visualizations. 
 
+
+NOTE FROM LYDIE: I wasn't actually thinking we would run our analysis at the family level; that's a pretty small sample size, especially with many families cut. I was just interested in grouping by family to explore wrangling and be able to visualize the data graphically and see whether there are patterns by family. I changed the ANOVA analyses accordingly and now we have significant results.
+
+
 ## Question 1: Does female tail length predict clutch size?
 $H_0$ : There is no significant difference between female tail length and clutch size.
 $H_A$ : There is a significant difference between female tail length and clutch size.
 
-```{r question_1_exploration}
-# Looks like there might be a relationship between tail length and clutch size
-# Does female size predict clutch size?
-summary(with(birds.subset, lm(Clutch_size ~ F_tail)))
-# Yes! But doesn't explain much variation. 
-# p < 0.001, R2 = 0.016
-#how do we get this plot to not be continuous? change family to chr from int?
-ggplot(birds.subset, aes(x = F_tail, y = Clutch_size)) +
-  geom_point(aes(color = ï..Family)) +
-  geom_smooth(method = "lm", se = F, color = "seagreen4")
 
-####### i think that we will only need the stuff above here what do you think?##
+QUESTION FROM LYDIE: Should these stay our hypotheses and we say we are including mass to control for it, or should we include mass in our hypotheses?
 
-# Now weight and clutch size
-# Verify that male and female mass are highly correlated
-summary(with(birds.subset, lm(M_mass ~ F_mass)))
-# They are: p < 0.001, R2 = 0.982. 
-# Maybe use female size since females lay eggs
 
-# Does female size predict clutch size?
+```{r question_1}
+# First, explore whether female mass predicts clutch size.
+# This is not our research question, but is important to assess 
+# whether our findings with tail length are simply explained by size.
 summary(with(birds.subset, lm(Clutch_size ~ F_mass)))
-# Not at all! p = 0.958, R2 < 0.001
-ggplot(birds.subset, aes(x = F_mass, y = Clutch_size)) +
-  geom_point(aes(color = Family)) +
-  xlim(0,12000) 
-# I think we have too many families for coloring by family to be meaningful
-# Figure out a different way to visualize groupings
+
+# OK Jackie I don't think we can really proceed with our tail explorations unless we take into account mass. Bc the variation in tail might just be explained by overall size rather than relative tail length. 
+
+# Do female mass and tail size predict clutch size?
+summary(with(birds.subset, lm(Clutch_size ~ F_tail * F_mass)))
+# Yes! Both mass and tail and their interaction are significant.
+# p < 0.001, R2 = 0.022
+
+# Plot the results
+ggplot(birds.subset[], aes(x = F_mass, y = Clutch_size)) +
+  geom_point(aes(color = F_tail), alpha = 0.8) +
+  geom_smooth(method = "lm", se = F, color = "seagreen4") +
+  labs(x = "Female Mass (g)", y = "Clutch Size", color = "Female Tail \nLength (mm)") +
+  scale_x_continuous(limits = c(0, 12000)) +
+  scale_color_viridis_c(option = "magma")
+# figure out a way to hide or change the NAs color? 
+
+ggplot(birds.subset[], aes(x = F_tail, y = Clutch_size)) +
+  geom_point(aes(color = F_mass), alpha = 0.7) +
+  geom_smooth(method = "lm", se = F, color = "seagreen4") +
+  labs(x = "Female Tail Length (mm)", y = "Clutch Size", color = "Female Mass (g)") +
+  scale_color_viridis_c(option = "magma")
+# the colors on this one are meaningless unless we can trim the extremes
 
 ```
 
 ## Question 2: Does female tail length predict mating approaches?
-$H_0$ : There is no significant impact of mating approaches on clutch size
-$H_A$ : There is a significant impact of mating approaches on clutch size.
+$H_0$ : Mating system and display behavior do not predict tail size.
+$H_A$ : Mating system and/or display behavior do predict tail size.
 
 ```{r question_2}
-##### we probably want to revisit this because it looks like nothing is significant ####
+#### NOTE: Because I switched us back to working with the subset dataset, we can use any of the variables. I think it makes sense to include mating system and display behavior but eliminate resource sharing because I think this research question is about mating, but lmk if you disagree!
+
 #test for normality
-shapiro.test() #this was giving me issues and I'm sure it's just something silly that I was doing
-qqnorm(birds.family$F_tail); qqline(birds.family$F_tail)
+shapiro.test(birds.subset$F_tail) 
+# Not normally distributed
 
-#test for equal variance; this is the only testable variable
-#common_display is all in the same group, and common_mating is consistent == 2
-bartlett.test(birds.family$F_tail ~ birds.family$Common_Resource)
+qqnorm(birds.subset$F_tail); qqline(birds.subset$F_tail)
+# looks like maybe a transformation is in order? Though we didn't really get into that in this class so maybe we can just call it a limitation
 
-#form the anova
-mating.anova <- aov(data = birds.family, F_tail ~ Common_Mating_System*Common_Display*Common_Resource)
-summary(mating.anova)
+# test for equal variance
+with(birds.subset, bartlett.test(F_tail ~ Display))
+with(birds.subset, bartlett.test(F_tail ~ Mating_System))
+# Both significant; the variances are not equal
+
+# Form the anova
+mating.anova <- aov(data = birds.subset, F_tail ~ Mating_System * Display)
+summary(mating.anova) # significant
+
+# Change settings to view all residual plots at once
+par(mfrow=c(2,2))
+# View residuals 
 plot(mating.anova)
+# Change settings back
+par(mfrow=c(1,1))
 
-mating.anova2 <- aov(data = birds.family, F_tail ~ Common_Display + Common_Resource)
-summary(mating.anova2)
+
 ```
 
 \newpage
