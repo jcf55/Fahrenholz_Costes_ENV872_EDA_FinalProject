@@ -75,6 +75,8 @@ str(birds)
 #look at the first few lines
 head(birds)
 
+# make sure family column is named correctly
+colnames(birds)[1] <- "Family"
 ```
 
 ```{r wrangle_the_data}
