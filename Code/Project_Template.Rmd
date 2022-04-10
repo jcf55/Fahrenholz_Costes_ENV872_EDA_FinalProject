@@ -107,15 +107,16 @@ birds.family <- birds.subset %>%
             Clutch_size = mean(Clutch_size, na.rm = TRUE),
             Common_Mating_System = Mode(Mating_System),
             Common_Display = Mode(Display),
-            Common_Resource = Mode(Resource)) %>%
-  filter(!is.na(Clutch_size), !is.na(Common_Mating_System),
-         !is.na(Common_Display), !is.na(Common_Resource), 
-         !is.na(F_tail), !is.na(F_mass), !is.na(F_bill))
+            Common_Resource = Mode(Resource)) #%>%
+  # filter(!is.na(Clutch_size), !is.na(Common_Mating_System),
+  #        !is.na(Common_Display), !is.na(Common_Resource), 
+  #        !is.na(F_tail), !is.na(F_mass), !is.na(F_bill))
 
 #write the csv file into our Processed data folder
 #write.csv(birds.subset, file = "./Data/Processed/birds_subset.csv")
 #write.csv(birds.family, file = "./Data/Processed/birds_wrangled.csv")
 ```
+
 
 ```{r more_exploration}
 # Work now from the processed file
@@ -133,7 +134,7 @@ ggpairs(birds.family)
 
 # View the counts of our factor variables
 count(birds.subset, vars = Mating_System) # SUPER uneven! This could be an issue contributing to uneven variances?
-count(birds.subset, vars = Display)
+count(birds.subset, vars = Display) # Also uneven but not quite as bad
 ```
 \newpage
 
