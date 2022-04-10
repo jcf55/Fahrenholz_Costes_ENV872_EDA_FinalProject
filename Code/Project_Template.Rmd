@@ -29,6 +29,7 @@ getwd()
 # Load packages
 library(tidyverse)
 library(GGally)
+library(car)
 
 # Set your ggplot theme
 ourtheme <- theme_bw(base_size = 12) +
@@ -157,17 +158,30 @@ QUESTION FROM LYDIE: Should these stay our hypotheses and we say we are includin
 
 
 ```{r question_1}
-# First, explore whether female mass predicts clutch size.
-# This is not our research question, but is important to assess 
-# whether our findings with tail length are simply explained by size.
-summary(with(birds.subset, lm(Clutch_size ~ F_mass)))
+# First, explore whether female mass and female tail length are correlated.
+# If they are highly correlated, then effects of tail length could be explained by mass.
+summary(with(birds.subset, lm(F_mass ~ F_tail)))
+# They are, though R2 is fairly low so mass doesn't explain most variation in tail length.
 
 # OK Jackie I don't think we can really proceed with our tail explorations unless we take into account mass. Bc the variation in tail might just be explained by overall size rather than relative tail length. 
 
 # Do female mass and tail size predict clutch size?
-summary(with(birds.subset, lm(Clutch_size ~ F_tail * F_mass)))
+lm.tailmass <- with(birds.subset, lm(Clutch_size ~ F_tail * F_mass))
+summary(lm.tailmass)
 # Yes! Both mass and tail and their interaction are significant.
 # p < 0.001, R2 = 0.022
+
+vif(lm.tailmass)
+# A VIF below 5 indicates acceptable level of multicollinearity
+
+# Change settings to view all residual plots at once
+par(mfrow=c(2,2))
+# View residuals 
+plot(lm.tailmass)
+# The Residuals vs. Fitted and Q-Q plots don't look great - maybe this would be a good question for a TA (how to interpret these)
+
+# Change settings back
+par(mfrow=c(1,1))
 
 # Plot the results
 ggplot(birds.subset[], aes(x = F_mass, y = Clutch_size)) +
@@ -187,33 +201,47 @@ ggplot(birds.subset[], aes(x = F_tail, y = Clutch_size)) +
 
 ```
 
-## Question 2: Does female tail length predict mating approaches?
+\newpage
+
+## Question 2: Does male tail length relate to mating approaches?
 $H_0$ : Mating system and display behavior do not predict tail size.
 $H_A$ : Mating system and/or display behavior do predict tail size.
 
 ```{r question_2}
-#### NOTE: Because I switched us back to working with the subset dataset, we can use any of the variables. I think it makes sense to include mating system and display behavior but eliminate resource sharing because I think this research question is about mating, but lmk if you disagree!
+#### NOTE: Because I switched us back to working with the subset dataset, we can use any of the variables. I think it makes sense to include mating system and display behavior but eliminate resource sharing because I think this research question is about mating, but lmk if you disagree! Also - isn't it more likely that male tail size would be related to mating behaviors? I added both so we can easily decide.
 
 #test for normality
 shapiro.test(birds.subset$F_tail) 
+shapiro.test(birds.subset$M_tail) 
 # Not normally distributed
 
 qqnorm(birds.subset$F_tail); qqline(birds.subset$F_tail)
+qqnorm(birds.subset$M_tail); qqline(birds.subset$M_tail)
 # looks like maybe a transformation is in order? Though we didn't really get into that in this class so maybe we can just call it a limitation
 
 # test for equal variance
 with(birds.subset, bartlett.test(F_tail ~ Display))
 with(birds.subset, bartlett.test(F_tail ~ Mating_System))
-# Both significant; the variances are not equal
+with(birds.subset, bartlett.test(M_tail ~ Display))
+with(birds.subset, bartlett.test(M_tail ~ Mating_System))
+# All significant; the variances are not equal
 
 # Form the anova
-mating.anova <- aov(data = birds.subset, F_tail ~ Mating_System * Display)
-summary(mating.anova) # significant
+mating.anova.f <- aov(data = birds.subset, F_tail ~ Mating_System * Display)
+summary(mating.anova.f) # just interaction is significant
+# Run with male tail length
+mating.anova.m <- aov(data = birds.subset, M_tail ~ Mating_System * Display)
+summary(mating.anova.m) # interaction & mating system are significant
+
+# I tried to pull the r-squared but it's saying "NULL"? Maybe I am doing wrong 
+s <- summary(mating.anova.m)
+s$r.squared
 
 # Change settings to view all residual plots at once
 par(mfrow=c(2,2))
 # View residuals 
-plot(mating.anova)
+plot(mating.anova.f)
+plot(mating.anova.m)
 # Change settings back
 par(mfrow=c(1,1))
 
@@ -223,18 +251,25 @@ par(mfrow=c(1,1))
 
 # Summary and Conclusions
 
-Female mass and tail size predict clutch size (p < 0.001, R2 = 0.022).
+## Part 1
+
+The interaction between female mass and tail size predicts clutch size (p < 0.001, n = 1642, R^2^ = 0.022). The effect of female tail size varies depending on the mass of the species. 
 * tail is negative; mass is positive; interaction is negative. I can't remember how to interpret all this with the interaction
 
 Limitations, Part 1
-(still need to run our assumptions for this one)
+(do we need to run more assumption tests for this one?)
 * R2 is low - model doesn't explain very much of the variance
+* residuals plots - ?
+
+## Part 2
+
+Mating system and display system together predict tail length (n = 476, is the p-value just the interaction p-value for this one?)
 
 Limitations, Part 2
 * tail is not normally distributed (consider transforming)
 * groups do not have equal variance (especially not surprising with Mating System because the vast majority of the bird species are Type 2 - Monogamous).
 * Need to check R2 for this one
-* otherwise, residuals etc look pretty good
+* residual plots - ?
 
 
 \newpage
@@ -242,3 +277,5 @@ Limitations, Part 2
 # References
 
 Evans, M.R. 1999. The consequences of flight for the evolution of tail ornaments in birds. In: Adams, N.J. & Slotow, R.H. (eds) Proc. 22 Int. Ornithol. Congr., Durban: 1823-1843. Johannesburg: BirdLife South Africa.
+
+Lislevand, T., Figuerola, J., and Székely, T. 2007. Avian body sizes in relation to fecundity, mating system, display behavior, and resource sharing. Ecology 88:1605.
