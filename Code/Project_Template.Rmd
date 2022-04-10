@@ -214,12 +214,24 @@ plot(mating.anova)
 # Change settings back
 par(mfrow=c(1,1))
 
-
 ```
 
 \newpage
 
 # Summary and Conclusions
+
+Female mass and tail size predict clutch size (p < 0.001, R2 = 0.022).
+* tail is negative; mass is positive; interaction is negative. I can't remember how to interpret all this with the interaction
+
+Limitations, Part 1
+(still need to run our assumptions for this one)
+* R2 is low - model doesn't explain very much of the variance
+
+Limitations, Part 2
+* tail is not normally distributed (consider transforming)
+* groups do not have equal variance (especially not surprising with Mating System because the vast majority of the bird species are Type 2 - Monogamous).
+* Need to check R2 for this one
+* otherwise, residuals etc look pretty good
 
 
 \newpage
