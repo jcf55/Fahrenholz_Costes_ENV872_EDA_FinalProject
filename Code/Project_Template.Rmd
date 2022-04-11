@@ -118,6 +118,9 @@ birds.family <- birds.subset %>%
 #write the csv file into our Processed data folder
 #write.csv(birds.subset, file = "./Data/Processed/birds_subset.csv")
 #write.csv(birds.family, file = "./Data/Processed/birds_wrangled.csv")
+
+
+# INclude boxplot of families and more exploratory analyses
 ```
 
 
@@ -189,11 +192,12 @@ ggplot(birds.subset[], aes(x = F_mass, y = Clutch_size)) +
   scale_color_viridis_c()
 # figure out a way to hide or change the NAs color? 
 
-ggplot(subset(birds.subset, F_mass<10000), aes(x = F_tail, y = Clutch_size)) +
-  geom_point(aes(color = F_mass), alpha = 1) +
+ggplot(subset(birds.subset, F_mass<5000), aes(x = F_tail, y = Clutch_size)) +
+  geom_point(aes(color = F_mass), alpha = 0.8) +
   geom_smooth(method = "lm", se = F, color = "seagreen4") +
   labs(x = "Female Tail Length (mm)", y = "Clutch Size", color = "Female Mass (g)") +
-  scale_color_viridis_c(option = "magma")
+  scale_color_viridis_c() +
+  scale_x_continuous(limits = c(0,400))
 # the colors on this one are meaningless unless we can trim the extremes
 
 # Consider cropping further for visualization
@@ -208,7 +212,6 @@ $H_A$ : Mating system and/or display behavior do predict tail size.
 
 ```{r question_2}
 #test for normality
-shapiro.test(birds.subset$F_tail) 
 shapiro.test(birds.subset$M_tail) 
 # Not normally distributed
 
@@ -232,6 +235,9 @@ summary(mating.anova)
 # Run with male tail length
 mating.anova.m <- aov(data = birds.subset, M_tail ~ Mating_System * Display)
 summary(mating.anova.m) # interaction & mating system are significant
+TukeyHSD(mating.anova.m)
+
+
 
 # I tried to pull the r-squared but it's saying "NULL"? Maybe I am doing wrong 
 s <- summary(mating.anova.m)
