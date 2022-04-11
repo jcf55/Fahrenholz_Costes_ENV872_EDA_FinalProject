@@ -93,8 +93,8 @@ birds <- birds %>%
 
 # Subset to columns we are interested in
 birds.subset <- birds %>%
-  select(Family, Species_name, Genus, F_mass, F_bill,
-          F_tail,Clutch_size, Mating_System, Display, 
+  select(Family, Species_name, Genus, F_mass, F_tail,
+          M_tail,Clutch_size, Mating_System, Display, 
           Resource)
 
 # This function allows calculation of mode for categorical variables
@@ -103,19 +103,24 @@ Mode <- function(x) {
   ux[which.max(tabulate(match(x, ux)))]
 }
 
+# Group male tail length by mating system to graph later
+birds.mating.tail <- birds.subset %>%
+  group_by(Mating_System) %>%
+  summarise(M_tail = mean(M_tail, na.rm = TRUE))
+
 # Group by family, average by mean or mode
 birds.family <- birds.subset %>%
   group_by(Family) %>% 
   summarise(F_mass = mean(F_mass, na.rm = TRUE),
-            F_bill = mean(F_bill, na.rm = TRUE),
             F_tail = mean(F_tail, na.rm = TRUE),
+            M_tail = mean(M_tail, na.rm = TRUE),
             Clutch_size = mean(Clutch_size, na.rm = TRUE),
             Common_Mating_System = Mode(Mating_System),
             Common_Display = Mode(Display),
             Common_Resource = Mode(Resource)) %>%
-  filter(!is.na(Clutch_size), !is.na(Common_Mating_System),
-          !is.na(Common_Display), !is.na(Common_Resource), 
-          !is.na(F_tail), !is.na(F_mass), !is.na(F_bill))
+  filter(!is.na(Clutch_size), #!is.na(Common_Mating_System),
+          #!is.na(Common_Display), !is.na(Common_Resource), 
+          !is.na(F_tail), !is.na(F_mass), !is.na(M_tail))
 
 #write the csv file into our Processed data folder
 write.csv(birds.subset, file = "./Data/Processed/birds_subset.csv")
@@ -128,12 +133,17 @@ write.csv(birds.family, file = "./Data/Processed/birds_family.csv")
 # Work now from the processed file
 birds.subset <- read_csv("./Data/Processed/birds_subset.csv")
 birds.family <- read_csv("./Data/Processed/birds_family.csv")
-# Set Family as a factor
-birds.subset$Family <- as.factor(birds.subset$Family)
 
 # Look at the data again, make sure it looks good
 dim(birds.subset)
 summary(birds.subset)
+str(birds.subset)
+
+# Set categorical variables as factors
+birds.subset$Family <- as.factor(birds.subset$Family)
+birds.subset$Mating_System <- as.factor(birds.subset$Mating_System)
+birds.subset$Display <- as.factor(birds.subset$Display)
+birds.subset$Resource <- as.factor(birds.subset$Resource)
 
 # View variable distributions and relationships
 ggpairs(birds.subset)
@@ -141,15 +151,16 @@ ggpairs(birds.subset)
 # View the counts of our factor variables
 count(birds.subset, vars = Mating_System) # SUPER uneven! This could be an issue contributing to uneven variances?
 count(birds.subset, vars = Display) # Also uneven but not quite as bad
-count(birds.subset, vars = Resource)
+count(birds.subset, vars = Resource) # Looks fine
 
 # Include boxplot of families
-# this first one is messy, I'm not sure how to change the labeling since the family
-# numbers are arbitrary
+# this first one is messy, I'm not sure how to change the labeling since the family numbers are arbitrary
 ggplot(birds.subset) +
   geom_boxplot(aes(x = Family, y = Clutch_size))
+
 ggplot(birds.family) +
   geom_point(aes(x = Family, y = Clutch_size))
+# I don't think the second one tells us anything
 ```
 \newpage
 
@@ -241,28 +252,47 @@ with(birds.subset, bartlett.test(M_tail ~ Mating_System))
 mating.anova <- aov(data = birds.subset, M_tail ~ Mating_System * Display * Resource)
 summary(mating.anova)
 
-# do AIC reduction process
+# Reduce the model to achieve significance
+# Remove 3-way interaction
+mating.anova.1 <- update(mating.anova, .~.-Mating_System:Display:Resource) 
+summary(mating.anova.1)
 
+# Remove Display:Resource
+mating.anova.2 <- update(mating.anova.1, .~.-Display:Resource) 
+summary(mating.anova.2)
 
+# Remove Mating_System:Resource
+mating.anova.3 <- update(mating.anova.2, .~.-Mating_System:Resource) 
+summary(mating.anova.3)
 
+# Remove Resource
+mating.anova.4 <- update(mating.anova.3, .~.-Resource) 
+summary(mating.anova.4)
+# Everything is significant.
+# Not possible to run an AIC comparison because the models do not contain the same number of observations.
+# Go with mating.anova.4, which is M_tail ~ Mating_System * Display
 
-# Run with male tail length
-mating.anova.m <- aov(data = birds.subset, M_tail ~ Mating_System * Display)
-summary(mating.anova.m) # interaction & mating system are significant
+# figure out how to run this
 TukeyHSD(mating.anova.m)
 
 
-
-# I tried to pull the r-squared but it's saying "NULL"? Maybe I am doing wrong 
-s <- summary(mating.anova.m)
+# I tried to pull the r-squared but it's saying "NULL"? Not sure R2 is correct to use with ANOVAs 
+s <- summary(mating.anova.4)
 s$r.squared
 
 # Change settings to view all residual plots at once
 par(mfrow=c(2,2))
 # View residuals 
-plot(mating.anova.m)
+plot(mating.anova.4)
 # Change settings back
 par(mfrow=c(1,1))
+
+# Graph results
+ggplot(data = subset(subset(birds.subset, !is.na(Mating_System)), !is.na(Display)), aes(x = Mating_System, y = M_tail, color = Display)) +
+  geom_boxplot() +
+  labs(x = "Mating System", y = "Average Tail Length (mm)") +
+  scale_x_discrete(labels = c("Polyandry", "Monogamy", "Mostly Monogamy", "Mostly Polygyny", "Promiscuous")) +
+  scale_color_discrete(labels = c("Ground Displays", "Mostly Ground", "Ground & Aerial", "Aerial, Non-Acrobatic", "Aerial, Acrobatic"))
 
 ```
 
