@@ -138,6 +138,7 @@ ggpairs(birds.subset)
 # View the counts of our factor variables
 count(birds.subset, vars = Mating_System) # SUPER uneven! This could be an issue contributing to uneven variances?
 count(birds.subset, vars = Display) # Also uneven but not quite as bad
+count(birds.subset, vars = Resource)
 ```
 \newpage
 
@@ -146,15 +147,12 @@ count(birds.subset, vars = Display) # Also uneven but not quite as bad
 To test our hypotheses using our subset data `birds.family`, we will conduct a linear regression and an analysis of variance (ANOVA). Our first research question will be answered using a linear regression, while our second will be addressed with an ANOVA. Results will be clearly stated in words, and supplemented using graphing visualizations. 
 
 
-NOTE FROM LYDIE: I wasn't actually thinking we would run our analysis at the family level; that's a pretty small sample size, especially with many families cut. I was just interested in grouping by family to explore wrangling and be able to visualize the data graphically and see whether there are patterns by family. I changed the ANOVA analyses accordingly and now we have significant results.
-
 
 ## Question 1: Does female tail length predict clutch size?
 $H_0$ : There is no significant difference between female tail length and clutch size.
 $H_A$ : There is a significant difference between female tail length and clutch size.
 
-
-QUESTION FROM LYDIE: Should these stay our hypotheses and we say we are including mass to control for it, or should we include mass in our hypotheses?
+Include note about controlling for mass here.
 
 
 ```{r question_1}
@@ -163,7 +161,6 @@ QUESTION FROM LYDIE: Should these stay our hypotheses and we say we are includin
 summary(with(birds.subset, lm(F_mass ~ F_tail)))
 # They are, though R2 is fairly low so mass doesn't explain most variation in tail length.
 
-# OK Jackie I don't think we can really proceed with our tail explorations unless we take into account mass. Bc the variation in tail might just be explained by overall size rather than relative tail length. 
 
 # Do female mass and tail size predict clutch size?
 lm.tailmass <- with(birds.subset, lm(Clutch_size ~ F_tail * F_mass))
@@ -185,19 +182,21 @@ par(mfrow=c(1,1))
 
 # Plot the results
 ggplot(birds.subset[], aes(x = F_mass, y = Clutch_size)) +
-  geom_point(aes(color = F_tail), alpha = 0.8) +
+  geom_point(aes(color = F_tail), alpha = 1) +
   geom_smooth(method = "lm", se = F, color = "seagreen4") +
   labs(x = "Female Mass (g)", y = "Clutch Size", color = "Female Tail \nLength (mm)") +
   scale_x_continuous(limits = c(0, 12000)) +
-  scale_color_viridis_c(option = "magma")
+  scale_color_viridis_c()
 # figure out a way to hide or change the NAs color? 
 
 ggplot(subset(birds.subset, F_mass<10000), aes(x = F_tail, y = Clutch_size)) +
-  geom_point(aes(color = F_mass), alpha = 0.7) +
+  geom_point(aes(color = F_mass), alpha = 1) +
   geom_smooth(method = "lm", se = F, color = "seagreen4") +
   labs(x = "Female Tail Length (mm)", y = "Clutch Size", color = "Female Mass (g)") +
   scale_color_viridis_c(option = "magma")
 # the colors on this one are meaningless unless we can trim the extremes
+
+# Consider cropping further for visualization
 
 ```
 
@@ -208,27 +207,28 @@ $H_0$ : Mating system and display behavior do not predict tail size.
 $H_A$ : Mating system and/or display behavior do predict tail size.
 
 ```{r question_2}
-#### NOTE: Because I switched us back to working with the subset dataset, we can use any of the variables. I think it makes sense to include mating system and display behavior but eliminate resource sharing because I think this research question is about mating, but lmk if you disagree! Also - isn't it more likely that male tail size would be related to mating behaviors? I added both so we can easily decide.
-
 #test for normality
 shapiro.test(birds.subset$F_tail) 
 shapiro.test(birds.subset$M_tail) 
 # Not normally distributed
 
-qqnorm(birds.subset$F_tail); qqline(birds.subset$F_tail)
+
 qqnorm(birds.subset$M_tail); qqline(birds.subset$M_tail)
 # looks like maybe a transformation is in order? Though we didn't really get into that in this class so maybe we can just call it a limitation
 
 # test for equal variance
-with(birds.subset, bartlett.test(F_tail ~ Display))
-with(birds.subset, bartlett.test(F_tail ~ Mating_System))
 with(birds.subset, bartlett.test(M_tail ~ Display))
 with(birds.subset, bartlett.test(M_tail ~ Mating_System))
 # All significant; the variances are not equal
 
-# Form the anova
-mating.anova.f <- aov(data = birds.subset, F_tail ~ Mating_System * Display)
-summary(mating.anova.f) # just interaction is significant
+mating.anova <- aov(data = birds.subset, M_tail ~ Mating_System * Display * Resource)
+summary(mating.anova)
+
+# do AIC reduction process
+
+
+
+
 # Run with male tail length
 mating.anova.m <- aov(data = birds.subset, M_tail ~ Mating_System * Display)
 summary(mating.anova.m) # interaction & mating system are significant
@@ -240,7 +240,6 @@ s$r.squared
 # Change settings to view all residual plots at once
 par(mfrow=c(2,2))
 # View residuals 
-plot(mating.anova.f)
 plot(mating.anova.m)
 # Change settings back
 par(mfrow=c(1,1))
