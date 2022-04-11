@@ -34,7 +34,7 @@ library(car)
 # Set your ggplot theme
 ourtheme <- theme_bw(base_size = 12) +
   theme(axis.text = element_text(color = "black"),
-        legend.position = "top")
+        legend.position = "right")
 theme_set(ourtheme)
 
 # Load datasets
@@ -129,11 +129,11 @@ birds.subset <- read_csv("./Data/Processed/birds_subset.csv")
 birds.subset$Family <- as.factor(birds.subset$Family)
 
 # Look at the data again, make sure it looks good
-dim(birds.family)
-colnames(birds.family)
+dim(birds.subset)
+summary(birds.subset)
 
 # View variable distributions and relationships
-ggpairs(birds.family)
+ggpairs(birds.subset)
 
 # View the counts of our factor variables
 count(birds.subset, vars = Mating_System) # SUPER uneven! This could be an issue contributing to uneven variances?
@@ -192,7 +192,7 @@ ggplot(birds.subset[], aes(x = F_mass, y = Clutch_size)) +
   scale_color_viridis_c(option = "magma")
 # figure out a way to hide or change the NAs color? 
 
-ggplot(birds.subset[], aes(x = F_tail, y = Clutch_size)) +
+ggplot(subset(birds.subset, F_mass<10000), aes(x = F_tail, y = Clutch_size)) +
   geom_point(aes(color = F_mass), alpha = 0.7) +
   geom_smooth(method = "lm", se = F, color = "seagreen4") +
   labs(x = "Female Tail Length (mm)", y = "Clutch Size", color = "Female Mass (g)") +
