@@ -38,7 +38,7 @@ ourtheme <- theme_bw(base_size = 12) +
 theme_set(ourtheme)
 
 # Load datasets
-birds <- read.csv("../Data/Raw/avian_ssd_jan07.csv")
+birds <- read.csv("./Data/Raw/avian_ssd_jan07.csv")
 
 # Set digit notation
 options(scipen = 10)
@@ -46,7 +46,9 @@ options(scipen = 10)
 
 # Rationale and Research Questions
 
-According to the study from which this data was extracted, avian body size and their evolution over time there is much to be debated. Generally, there is agreement about the idea that body size of bird species impacts other characteristics. Because of this, this project intends to explore the correlation between body size of avian species with various measurements and observations in this dataset. First, we ask the question if female tail size predicts clutch size. Tail length has a significant impact on control and agility (Evans 1999). Longer tails increase crash risk as well as reduces the ability to maneuver (Evans 1999). We believe that this may have an overall negative impact on clutch size, as birds with longer tail lengths may be less efficient at collecting food for their young. To follow this analysis, we will explore tail length variation in comparison with methods of display, mating system, and resource sharing systems. 
+According to the study from which this data was extracted, avian body size and the evolution of birds over time is a highly debated subject matter. Generally, there is agreement around the idea that body size of bird species impacts other characteristics. Because of this, this project intends to explore the correlation between body size and various measurements and observations in our data. 
+
+First, we ask the question if female tail size predicts clutch size. Tail length has a significant impact on control and agility (Evans 1999). Longer tails increase crash risk as well as reduces the ability to maneuver (Evans 1999). We believe that this may have an overall negative impact on clutch size, as birds with longer tail lengths may be less efficient at collecting food for their young. Second, we will explore interactions between male tail length and methods of display, mating system, and resource sharing systems. Tail length likely has a negative impact on navigation, and collecting food, while having a positive impact on sexual display. Physical characteristics of males are evaluated by females in search of a mate. 
 
 \newpage
 
@@ -110,24 +112,22 @@ birds.family <- birds.subset %>%
             Clutch_size = mean(Clutch_size, na.rm = TRUE),
             Common_Mating_System = Mode(Mating_System),
             Common_Display = Mode(Display),
-            Common_Resource = Mode(Resource)) #%>%
-  # filter(!is.na(Clutch_size), !is.na(Common_Mating_System),
-  #        !is.na(Common_Display), !is.na(Common_Resource), 
-  #        !is.na(F_tail), !is.na(F_mass), !is.na(F_bill))
+            Common_Resource = Mode(Resource)) %>%
+  filter(!is.na(Clutch_size), !is.na(Common_Mating_System),
+          !is.na(Common_Display), !is.na(Common_Resource), 
+          !is.na(F_tail), !is.na(F_mass), !is.na(F_bill))
 
 #write the csv file into our Processed data folder
-#write.csv(birds.subset, file = "./Data/Processed/birds_subset.csv")
-#write.csv(birds.family, file = "./Data/Processed/birds_wrangled.csv")
-
-
-# INclude boxplot of families and more exploratory analyses
+write.csv(birds.subset, file = "./Data/Processed/birds_subset.csv")
+write.csv(birds.family, file = "./Data/Processed/birds_family.csv")
 ```
 
 
 ```{r more_exploration}
+  
 # Work now from the processed file
 birds.subset <- read_csv("./Data/Processed/birds_subset.csv")
-
+birds.family <- read_csv("./Data/Processed/birds_family.csv")
 # Set Family as a factor
 birds.subset$Family <- as.factor(birds.subset$Family)
 
@@ -142,12 +142,20 @@ ggpairs(birds.subset)
 count(birds.subset, vars = Mating_System) # SUPER uneven! This could be an issue contributing to uneven variances?
 count(birds.subset, vars = Display) # Also uneven but not quite as bad
 count(birds.subset, vars = Resource)
+
+# Include boxplot of families
+# this first one is messy, I'm not sure how to change the labeling since the family
+# numbers are arbitrary
+ggplot(birds.subset) +
+  geom_boxplot(aes(x = Family, y = Clutch_size))
+ggplot(birds.family) +
+  geom_point(aes(x = Family, y = Clutch_size))
 ```
 \newpage
 
 # Analysis
 
-To test our hypotheses using our subset data `birds.family`, we will conduct a linear regression and an analysis of variance (ANOVA). Our first research question will be answered using a linear regression, while our second will be addressed with an ANOVA. Results will be clearly stated in words, and supplemented using graphing visualizations. 
+To test our hypotheses using our subset data `birds.subset`, we will conduct a linear regression and an analysis of variance (ANOVA). Our first research question will be answered using a linear regression, while our second will be addressed with an ANOVA. Results will be clearly stated in words, and supplemented using graphing visualizations. 
 
 
 
@@ -155,7 +163,7 @@ To test our hypotheses using our subset data `birds.family`, we will conduct a l
 $H_0$ : There is no significant difference between female tail length and clutch size.
 $H_A$ : There is a significant difference between female tail length and clutch size.
 
-Include note about controlling for mass here.
+Prior to conducting this anlaysis, it was identified that there is a strong correlation between mass and tail length. We therefore included this variable in our model, to see the further implications of this. 
 
 
 ```{r question_1}
@@ -190,7 +198,7 @@ ggplot(birds.subset[], aes(x = F_mass, y = Clutch_size)) +
   labs(x = "Female Mass (g)", y = "Clutch Size", color = "Female Tail \nLength (mm)") +
   scale_x_continuous(limits = c(0, 12000)) +
   scale_color_viridis_c()
-# figure out a way to hide or change the NAs color? 
+# NA OMIT UPDATE: if you do ggplot(data = na.omit(birds.subset)) it'll remove them but then the graph looks a lot different, I trust your judgement on which one we end up using
 
 ggplot(subset(birds.subset, F_mass<5000), aes(x = F_tail, y = Clutch_size)) +
   geom_point(aes(color = F_mass), alpha = 0.8) +
@@ -198,10 +206,16 @@ ggplot(subset(birds.subset, F_mass<5000), aes(x = F_tail, y = Clutch_size)) +
   labs(x = "Female Tail Length (mm)", y = "Clutch Size", color = "Female Mass (g)") +
   scale_color_viridis_c() +
   scale_x_continuous(limits = c(0,400))
-# the colors on this one are meaningless unless we can trim the extremes
+
 
 # Consider cropping further for visualization
-
+ggplot(subset(birds.subset, F_mass<500), aes(x = F_tail, y = Clutch_size)) +
+  geom_point(aes(color = F_mass), alpha = 0.8) +
+  geom_smooth(method = "lm", se = F, color = "seagreen4") +
+  labs(x = "Female Tail Length (mm)", y = "Clutch Size", color = "Female Mass (g)") +
+  scale_color_viridis_c() +
+  scale_x_continuous(limits = c(0,100)) +
+  scale_y_continuous(limits = c(1, 10))
 ```
 
 \newpage
