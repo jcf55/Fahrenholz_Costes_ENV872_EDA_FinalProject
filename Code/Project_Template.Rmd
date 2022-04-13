@@ -30,6 +30,9 @@ getwd()
 library(tidyverse)
 library(GGally)
 library(car)
+library(knitr)
+#install.packages("psych")
+library(psych)
 
 # Set your ggplot theme
 ourtheme <- theme_bw(base_size = 12) +
@@ -93,9 +96,9 @@ birds <- birds %>%
 
 # Subset to columns we are interested in
 birds.subset <- birds %>%
-  select(Family, Species_name, Genus, F_mass, F_tail,
-          M_tail,Clutch_size, Mating_System, Display, 
-          Resource)
+  select(Family, Species_name, Genus, F_mass, M_mass, 
+         F_tail, M_tail, Clutch_size, Mating_System, 
+         Display, Resource)
 
 # This function allows calculation of mode for categorical variables
 Mode <- function(x) {
@@ -112,6 +115,7 @@ birds.mating.tail <- birds.subset %>%
 birds.family <- birds.subset %>%
   group_by(Family) %>% 
   summarise(F_mass = mean(F_mass, na.rm = TRUE),
+            M_mass = mean(M_mass, na.rm = TRUE),
             F_tail = mean(F_tail, na.rm = TRUE),
             M_tail = mean(M_tail, na.rm = TRUE),
             Clutch_size = mean(Clutch_size, na.rm = TRUE),
@@ -122,28 +126,25 @@ birds.family <- birds.subset %>%
           #!is.na(Common_Display), !is.na(Common_Resource), 
           !is.na(F_tail), !is.na(F_mass), !is.na(M_tail))
 
-#write the csv file into our Processed data folder
-write.csv(birds.subset, file = "./Data/Processed/birds_subset.csv")
-write.csv(birds.family, file = "./Data/Processed/birds_family.csv")
-```
-
-
-```{r more_exploration}
-  
-# Work now from the processed file
-birds.subset <- read_csv("./Data/Processed/birds_subset.csv")
-birds.family <- read_csv("./Data/Processed/birds_family.csv")
-
-# Look at the data again, make sure it looks good
-dim(birds.subset)
-summary(birds.subset)
-str(birds.subset)
-
 # Set categorical variables as factors
 birds.subset$Family <- as.factor(birds.subset$Family)
 birds.subset$Mating_System <- as.factor(birds.subset$Mating_System)
 birds.subset$Display <- as.factor(birds.subset$Display)
 birds.subset$Resource <- as.factor(birds.subset$Resource)
+
+# Write the csv file into our Processed data folder
+#write.csv(birds.subset, file = "./Data/Processed/birds_subset.csv")
+#write.csv(birds.family, file = "./Data/Processed/birds_family.csv")
+# Commented out because we've done this already and the saved files should be good as is
+```
+
+
+
+```{r explore_processed_dataset}
+# Look at the data again, make sure it looks good
+dim(birds.subset)
+summary(birds.subset)
+str(birds.subset)
 
 # View variable distributions and relationships
 ggpairs(birds.subset)
@@ -153,14 +154,59 @@ count(birds.subset, vars = Mating_System) # SUPER uneven! This could be an issue
 count(birds.subset, vars = Display) # Also uneven but not quite as bad
 count(birds.subset, vars = Resource) # Looks fine
 
-# Include boxplot of families
-# this first one is messy, I'm not sure how to change the labeling since the family numbers are arbitrary
-ggplot(birds.subset) +
-  geom_boxplot(aes(x = Family, y = Clutch_size))
+# Create summary table (using "psych" package)
+birds_summary <- describe(birds.subset[,c("F_mass", "M_mass", "F_tail", "M_tail", "Clutch_size")], fast = T)
 
-ggplot(birds.family) +
-  geom_point(aes(x = Family, y = Clutch_size))
-# I don't think the second one tells us anything
+kable(birds_summary, caption = "Summary Statistics for Continuous Variables")
+
+```
+
+
+```{r exploratory_plots}
+# Boxplot of families vs clutch size
+ggplot(birds.subset) +
+  geom_boxplot(aes(x = Family, y = Clutch_size)) +
+  theme(axis.text.x = element_blank(), 
+        axis.ticks.x = element_blank())
+
+# Boxplot of families vs female tail
+ggplot(birds.subset) +
+  geom_boxplot(aes(x = Family, y = F_tail)) +
+  theme(axis.text.x = element_blank(), 
+        axis.ticks.x = element_blank())
+
+# Boxplot of families vs male tail
+ggplot(birds.subset) +
+  geom_boxplot(aes(x = Family, y = M_tail)) +
+  theme(axis.text.x = element_blank(), 
+        axis.ticks.x = element_blank())
+# Similar to female tail pattern but more extreme values probably represent families with sexual selection more impacting tail length
+
+# Run regression to compare male and female tail length
+lm.tail <- lm(data = birds.subset, M_tail ~ F_tail)
+# Check summary
+summary(lm.tail) # highly correlated
+# View relationship
+ggplot(birds.subset, aes(x = F_tail, y = M_tail)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = F)
+# again, unusually high male tail lengths probably represent species with sexual selection more impacting tail length
+
+# Boxplot of mating system vs male tail length
+ggplot(birds.subset) +
+  geom_boxplot(aes(x = Mating_System, y = M_tail)) +
+  labs(y = "Male Tail Length (mm)")
+
+# Boxplot of display system vs male tail length
+ggplot(birds.subset) +
+  geom_boxplot(aes(x = Display, y = M_tail)) +
+  labs(y = "Male Tail Length (mm)")
+
+# Boxplot of resource system vs male tail length
+ggplot(birds.subset) +
+  geom_boxplot(aes(x = Resource, y = M_tail)) +
+  labs(y = "Male Tail Length (mm)")
+
 ```
 \newpage
 
