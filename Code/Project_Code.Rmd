@@ -5,7 +5,7 @@ output:
     fig_caption: yes
     number_sections: yes
 geometry: margin=2.54cm
-title: "Comparison of Avian Clutch Size, Physical Characterists, and Mating Tactics"
+title: "Comparison of Physical Characteristics, Avian Clutch Size, and Mating Tactics"
 subtitle: "https://github.com/jcf55/Fahrenholz_Costes_ENV872_EDA_FinalProject"
 author: "Lydie Costes and Jackie Fahrenholz"
 fontsize: 12pt
@@ -33,6 +33,7 @@ library(car)
 library(knitr)
 library(psych)
 library(agricolae)
+library(cowplot)
 
 # Set your ggplot theme
 ourtheme <- theme_bw(base_size = 12) +
@@ -49,9 +50,11 @@ options(scipen = 10)
 
 # Rationale and Research Questions
 
-According to the study from which this data was extracted, avian body size and the evolution of birds over time is a highly debated subject matter. Generally, there is agreement around the idea that body size of bird species impacts other characteristics. Because of this, this project intends to explore the correlation between body size and various measurements and observations in our data. 
+According to the study from which this data was extracted, avian body size and the evolution of birds over time is a highly debated subject matter. Generally, there is agreement around the idea that body size of bird species relates to other characteristics. This project intends to explore the correlation between body size and other characteristics in our data. 
 
-First, we ask the question if female tail size predicts clutch size. Tail length has a significant impact on control and agility (Evans 1999). Longer tails increase crash risk as well as reduces the ability to maneuver (Evans 1999). We believe that this may have an overall negative impact on clutch size, as birds with longer tail lengths may be less efficient at collecting food for their young. Second, we will explore interactions between male tail length and methods of display, mating system, and resource sharing systems. Tail length likely has a negative impact on navigation, and collecting food, while having a positive impact on sexual display. Physical characteristics of males are evaluated by females in search of a mate. 
+First, we ask the question if female tail size predicts clutch size. Tail length has a significant impact on control and agility (Evans 1999). Longer tails increase crash risk as well as reduces the ability to maneuver (Evans 1999). We believe that this may have an overall negative impact on clutch size, as birds with longer tail lengths may be less efficient at collecting food for their young. 
+
+Second, we will explore interactions between male tail length and methods of display, mating system, and resource sharing systems. Tail length likely has a negative impact on navigation, and collecting food, while having a positive impact on sexual display. Physical characteristics of males are evaluated by females in search of a mate, but the importance of tail length may vary greatly by species. 
 
 # Dataset Information
 
@@ -64,26 +67,28 @@ Our dataset consists of data that was collected starting in 2005 and was last up
 * New Zealand
 * Antarctica
 
-The complete dataset (represented below by the variable `birds`) includes 41 variables, and represents 125 families. According to the metadata, the majority of this information was gathered from ornithological handbooks, with some data obtained from personal communications with authors who published information on species bird groups. More information on the sources used can be found at: https://esapubs.org/archive/ecol/E088/096/metadata.htm (also in /Data/Raw in the .tex file) 
+The complete dataset (represented below by the variable `birds`) includes 41 variables and represents 125 families. According to the metadata, the majority of this information was gathered from ornithological handbooks, with some data obtained from personal communications with authors who published information on species bird groups. More information on the sources used can be found at: https://esapubs.org/archive/ecol/E088/096/metadata.htm (also in /Data/Raw in the .tex file) 
 
 \newpage
 
-# Exploratory Analysis 
+# Exploration of Raw Data 
 ```{r explore_the_full_data}
 #dimensions
 dim(birds)
 #column names
 colnames(birds)
-#variable types?
+#variable types
 str(birds)
-#look at the first few lines
-head(birds)
 
-# make sure family column is named correctly
-colnames(birds)[1] <- "Family"
 ```
 
+\newpage
+
+# Data Wrangling
 ```{r wrangle_the_data, warning = FALSE, message = FALSE}
+# make sure family column is named correctly
+colnames(birds)[1] <- "Family"
+
 # Convert -999 to NAs and add genus column
 birds <- birds %>%
   na_if(., -999) %>%
@@ -98,16 +103,16 @@ birds.subset <- birds %>%
          F_tail, M_tail, Clutch_size, Mating_System, 
          Display, Resource)
 
+# Group male tail length by mating system to graph later
+birds.mating.tail <- birds.subset %>%
+  group_by(Mating_System) %>%
+  summarise(M_tail = mean(M_tail, na.rm = TRUE))
+
 # This function allows calculation of mode for categorical variables
 Mode <- function(x) {
   ux <- unique(x) 
   ux[which.max(tabulate(match(x, ux)))]
 }
-
-# Group male tail length by mating system to graph later
-birds.mating.tail <- birds.subset %>%
-  group_by(Mating_System) %>%
-  summarise(M_tail = mean(M_tail, na.rm = TRUE))
 
 # Group by family, average by mean or mode
 birds.family <- birds.subset %>%
@@ -134,6 +139,8 @@ write.csv(birds.subset, file = "../Data/Processed/birds_subset.csv")
 write.csv(birds.family, file = "../Data/Processed/birds_family.csv")
 ```
 
+# Exploration of Processed Data
+
 ```{r explore_processed_dataset, include = FALSE}
 # Look at the data again, make sure it looks good
 dim(birds.subset)
@@ -148,10 +155,11 @@ ggpairs(gg.birds.subset)
 
 # View the counts of our factor variables
 count(birds.subset, vars = Mating_System) 
-# SUPER uneven! This could be an issue contributing to uneven variances?
-count(birds.subset, vars = Display) # Also uneven but not quite as bad
+# SUPER uneven! Could be an issue for ANOVA because of likely uneven variances
+count(birds.subset, vars = Display) # Also uneven but not as bad
 count(birds.subset, vars = Resource) # Looks fine
 ```
+
 
 ```{r summary table, echo = FALSE}
 # Create summary table (using "psych" package)
@@ -160,6 +168,7 @@ birds_summary <- describe(birds.subset[,c("F_mass", "M_mass", "F_tail", "M_tail"
 kable(birds_summary, caption = "Summary Statistics for Continuous Variables")
 
 ```
+
 
 ```{r exploratory_plots, echo = FALSE, warning = FALSE, fig.cap = "Exploratory Plot of Wrangled Data"}
 # Boxplot of families vs clutch size
@@ -172,21 +181,25 @@ ggplot(birds.subset) +
 
 ```{r r exploratory_plots_1, echo = FALSE, warning = FALSE, fig.cap = "Exploratory Plot of Wrangled Data"}
 # Boxplot of families vs female tail
-ggplot(birds.subset) +
+plot.fam.ftail <- ggplot(birds.subset) +
   geom_boxplot(aes(x = Family, y = F_tail)) +
   theme(axis.text.x = element_blank(), 
         axis.ticks.x = element_blank()) +
-  ylab("Female Tail Length (mm)")
+  ylab("Female Tail Length (mm)") +
+  scale_y_continuous(limits = c(NA, 800))
 ```
 
 ```{r r exploratory_plots_2, echo = FALSE, warning = FALSE, fig.cap = "Exploratory Plot of Wrangled Data"}
 # Boxplot of families vs male tail
-ggplot(birds.subset) +
+plot.fam.mtail <- ggplot(birds.subset) +
   geom_boxplot(aes(x = Family, y = M_tail)) +
   theme(axis.text.x = element_blank(), 
         axis.ticks.x = element_blank()) +
-  ylab("Male Tail Length (mm)")
+  ylab("Male Tail Length (mm)") +
+  scale_y_continuous(limits = c(NA, 800))
 # Similar to female tail pattern but more extreme values probably represent families with sexual selection more impacting tail length
+
+plot_grid(plot.fam.ftail, plot.fam.mtail)
 ```
 
 ```{r regression}
@@ -194,10 +207,10 @@ ggplot(birds.subset) +
 lm.tail <- lm(data = birds.subset, M_tail ~ F_tail)
 # Check summary
 summary(lm.tail) # highly correlated
+# View relationship
 ```
 
 ```{r r exploratory_plots_3, echo = FALSE, warning = FALSE, fig.cap = "Exploratory Plot of Wrangled Data"}
-# View relationship
 ggplot(birds.subset, aes(x = F_tail, y = M_tail)) +
   geom_point() +
   geom_smooth(method = "lm", se = F) +
@@ -267,7 +280,7 @@ plot(lm.tailmass)
 par(mfrow=c(1,1))
 ```
 
-``` {r q-1 plots, echo = FALSE, warning = FALSE, fig.cap = "Female Mass vs Clutch Size"}
+``` {r q-1 plots, include = FALSE, fig.cap = "Female Mass vs Clutch Size"}
 # Plot the results
 ggplot(birds.subset[], aes(x = F_mass, y = Clutch_size)) +
   geom_point(aes(color = F_tail), alpha = 1) +
@@ -277,13 +290,14 @@ ggplot(birds.subset[], aes(x = F_mass, y = Clutch_size)) +
   scale_color_viridis_c()
 ```
 
-```{r q-1 plot zoom, echo = FALSE, warning = FALSE, fig.cap = "A Closer Look: Female Mass vs Clutch Size"}
+```{r q-1 plot zoom, echo = FALSE, warning = FALSE, message = FALSE, fig.cap = "Female Tail Length vs Clutch Size"}
 ggplot(subset(birds.subset, F_mass<5000), aes(x = F_tail, y = Clutch_size)) +
   geom_point(aes(color = F_mass), alpha = 0.8) +
   geom_smooth(method = "lm", se = F, color = "seagreen4") +
   labs(x = "Female Tail Length (mm)", y = "Clutch Size", color = "Female Mass (g)") +
   scale_color_viridis_c() +
-  scale_x_continuous(limits = c(0,400))
+  scale_x_continuous(limits = c(NA,450)) +
+  scale_y_continuous(limits = c(NA,15))
 ```
 
 \newpage
