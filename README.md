@@ -1,4 +1,3 @@
-# Comparison of Avian Clutch Size, Physical Characterists, and Mating Tactics
 # Comparison of Avian Clutch Size, Physical Characteristics, and Mating Tactics
 # ENV872: EDA Final Project
 
@@ -37,13 +36,13 @@ For our wrangled data, located in the Processed folder, 11 variables were mainta
 
 |Column Name           | Description                | Class   | Units |
 |--------------------  | -------------------------- | ------- | ----- |
-|  Family              | Family Number              | integer | NA    |
-|  F_mass              | Female Mass                | number  | grams |
-|  M_mass              | Male Mass                  | number  | grams |
-|  F_bill              | Female Bill Length         | number  | mm    |
-|  M_bill              | Male Bill Length           | number  | mm    |
-|  F_tail              | Female Tail Length         | number  | mm    |
-|  M_tail              | Male Tail Length           | number  | mm    |
+|  Family              | Family number              | factor | NA    |
+|  Species_name	| Scientific name of species | character | NA	|
+|  Genus		| Genus				| character	| NA	|
+|  F_mass              | Female mass                | number  | grams |
+|  M_mass              | Male mass                  | number  | grams |
+|  F_tail              | Female tail length         | number  | mm    |
+|  M_tail              | Male tail length           | number  | mm    |
 | Clutch_size          | Average # of eggs          | number  | NA    |
 | Mating_System | Score of system            | integer | NA    |
 | Display       | Score of display agility   | integer | NA    |
