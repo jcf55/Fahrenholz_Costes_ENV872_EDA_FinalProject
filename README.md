@@ -1,4 +1,5 @@
 # Comparison of Avian Clutch Size, Physical Characterists, and Mating Tactics
+# Comparison of Avian Clutch Size, Physical Characteristics, and Mating Tactics
 # ENV872: EDA Final Project
 
 ## Summary
@@ -14,16 +15,11 @@ Our analysis intends to identify trends found between the avian species represen
 
 ## Keywords
 
-<<<<<<< HEAD
 birds, mating system, clutch size, avian mass, display behavior, morphology, life history, data analytics
-=======
-birds, mating system, clutch-size, avian mass
->>>>>>> 21f2ebb556e45e099c4f8ff18aace8f4a18c5da6
 
 ## Database Information
 
 This data set was found using www.ecologicaldata.org, an open source website for various kinds of biological data. It was originally accessed on March 29th, 2022 and later altered for analysis purposes using RStudio. Variables from the original data sets that were repetitive or not relevant for our comparative analysis were removed. The original data can be found in the Data/Raw folder, while other data sets created by the authors of this repository can be found in Data/Processed. 
-
 
 ## Folder structure, file formats, and naming conventions 
 
