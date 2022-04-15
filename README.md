@@ -5,8 +5,7 @@
 
 This repository holds the contents related to a Duke Nicholas School of the Environment course titled Environmental Data Analytics, taught during the Spring of 2022. The data used for our analysis consist of publicly available bird size and behavioral characteristics consolidated from various sources by Lislevand et al (2007). The data folder includes both raw and processed versions of the dataset as well as metadata. The creators of this repository are in no way connected to the creation of the dataset, so please see the metadata files for more information.
 
-Our analysis intends to identify trends found between the avian species represented in this data. Within this field of study there is a lot of interest related to avian body size and the impacts this has on other characteristics of a species. Ultimately, we will give insight into two relationships. The first is conducted while controlling for mass to identify how female tail length impacts clutch size. The second, dives into the relationship between mating tactics and tail length. To achieve this, linear regressions and ANOVA were conducted and further explored to simplify models.
-
+Our analysis intends to identify trends found between the avian species represented in this data. Within this field of study there is a lot of interest related to avian body size and the impacts this has on other characteristics of a species. Ultimately, we will give insight into two relationships. The first is conducted while controlling for mass to identify how female tail length impacts clutch size. The second, dives into the relationship between mating tactics and male tail length. To achieve this, linear regressions and ANOVA were conducted and further explored to simplify models.
 
 ## Investigators
 
@@ -15,8 +14,11 @@ Our analysis intends to identify trends found between the avian species represen
 
 ## Keywords
 
+<<<<<<< HEAD
 birds, mating system, clutch size, avian mass, display behavior, morphology, life history, data analytics
-
+=======
+birds, mating system, clutch-size, avian mass
+>>>>>>> 21f2ebb556e45e099c4f8ff18aace8f4a18c5da6
 
 ## Database Information
 
@@ -51,7 +53,6 @@ For our wrangled data, located in the Processed folder, 11 variables were mainta
 | Display       | Score of display agility   | integer | NA    |
 | Resource      | Score of territoriality & inter-mate sharing  | integer | NA    |
                          
-
 ### Scores defined
 
 Scoring for each system is created as follow:
@@ -80,13 +81,9 @@ _Resource_
 
 ## Scripts and code
 
-Within this repository, you will find a `Project_Template.Rmd` which includes all the code used to wrangle, visualize, and evaluate our research questions. This `.Rmd` file can be found within the Code folder. 
+Within this repository, you will find a `Project_Code.Rmd` which includes all the code used to wrangle, visualize, and evaluate our research questions. This `.Rmd` file can be found within the Code folder. 
 
 ## Quality assurance/quality control
 
-<describe any relevant QA/QC procedures taken with your data. Some ideas can be found here:>
-<https://www.dataone.org/best-practices/develop-quality-assurance-and-quality-control-plan>
-<https://www.dataone.org/best-practices/ensure-basic-quality-control>
-<https://www.dataone.org/best-practices/communicate-data-quality>
-<https://www.dataone.org/best-practices/identify-outliers>
-<https://www.dataone.org/best-practices/identify-values-are-estimated>
+Original data for this project was simplified and wrangled to support research questions. Outliers were not removed from the data, but only during visualizations in order to gain a clearer picture in areas where was high in quantity. Because this data was collected currently from 2005-2007 and it not a total dataset of all bird species, it should be noted that conclusions made in this report, and others generated are insights and should be further explored with other datasets that may be more robust.
+
