@@ -163,7 +163,7 @@ birds_summary <- describe(birds.subset[,c("F_mass", "M_mass", "F_tail", "M_tail"
 
 kable(birds_summary, caption = "Summary Statistics for Continuous Variables")
 
-#sumtable(birds.subset, vars = c("Mating_System", "Display", "Resource"), title = "Summary Statistics for Categorical Variables")
+# sumtable(birds.subset, vars = c("Mating_System", "Display", "Resource"), title = "Summary Statistics for Categorical Variables")
 # Mating_System is VERY uneven; this could mean uneven variance in ANOVA
 ```
 
@@ -447,7 +447,6 @@ ggplot(data = subset(subset(birds.subset, !is.na(Mating_System)), !is.na(Display
 
 # Summary and Conclusions
 
-*Summarize your major findings from your analyses in a few paragraphs. What conclusions do you draw from your findings? Relate your findings back to the original research questions and rationale.*
 
 ## Part 1
 
@@ -480,3 +479,4 @@ As described above, birds vary in tail length according to both their mating sys
 Evans, M.R. 1999. The consequences of flight for the evolution of tail ornaments in birds. In: Adams, N.J. & Slotow, R.H. (eds) Proc. 22 Int. Ornithol. Congr., Durban: 1823-1843. Johannesburg: BirdLife South Africa.
 
 Lislevand, T., Figuerola, J., and Székely, T. 2007. Avian body sizes in relation to fecundity, mating system, display behavior, and resource sharing. Ecology 88:1605.
+
