@@ -179,7 +179,12 @@ ggplot(birds.subset) +
 
 
 \newpage
+
+### Female versus Male Tail Length
+
 As part of our exploration, we ran a regression to assess how correlated male and female tail lengths are.
+
+
 ```{r tail_regression, echo = FALSE, warning = FALSE, message = FALSE}
 # Run regression to compare male and female tail length
 lm.tail <- lm(data = birds.subset, M_tail ~ F_tail)
@@ -298,9 +303,11 @@ par(mfrow=c(1,1))
 ```
 
 
+
+
 \newpage
 
-Below, clutch size declines with increasing female tail length. 
+Below: clutch size declines with increasing female tail length. 
 
 
 ```{r q-1_plot_main, echo = FALSE, warning = FALSE, message = FALSE, fig.cap = "Female Tail Length vs Clutch Size"}
@@ -382,12 +389,15 @@ summary(mating.anova.4)
 # Go with mating.anova.4
 ```
 
+Here is the final model:
+
+
 ```{r problem_2_final_model, warning = FALSE, message = FALSE}
 mating.anova.final <- aov(data = birds.subset, M_tail ~ Mating_System * Display)
 summary(mating.anova.final)
 ``` 
 
-```{r tukey, eval = FALSE, warning = FALSE, message = FALSE}
+```{r tukey, include = FALSE, warning = FALSE, message = FALSE}
 #Grouping with Tukey HSD
 anova.group <- HSD.test(mating.anova.4, "M_tail", group = TRUE)
 anova.group
@@ -448,17 +458,19 @@ Limitations
 * R2 is low - model doesn't explain very much of the variance
 * residuals plots - ?
 
-This finding supports our hypothesis that birds with longer tails may expend more resources collecting food because of their reduced agility and therefore can raise smaller broods. More research is needed to substantiate this hypothesis as well as to better understand how overall body size mediates the effect. 
+This finding supports our hypothesis that birds with longer tails may expend more resources collecting food because of their reduced agility. Therefore, they may have adapted to produce fewer eggs because they cannot care for as many chicks as more agile birds. More research is needed to substantiate this hypothesis as well as to better understand how overall body size mediates the effect. 
 
 
 ## Part 2
 
-Mating system and display system together predict tail length (n = 476, is the p-value just the interaction p-value for this one?)
+Mating system and display system interact to predict tail length (n = 476, p < 0.001), supporting our hypothesis. In general, mostly polygynous and promiscuous birds with mostly ground displays appear to have the longest tails. Among monogamous and mostly monogamous birds, those with aerial displays have the longest tails.
 
 Limitations, Part 2
 * tail is not normally distributed (consider transforming)
 * groups do not have equal variance (especially not surprising with Mating System because the vast majority of the bird species are Type 2 - Monogamous).
 * residual plots - ?
+
+As described above, birds vary in tail length according to both their mating system and their display system. This finding is not surprising considering that male birds with particularly long tails are known to use them in courtship displays, so species of birds have developed varied tail lengths alongside specific mating behaviors. We chose not to control for overall in this model because increasingly complex statistical analyses are outside of the scope covered in this course, but the lack of control is a definitive limitation of this finding: some patterns of mating system and display predicting tail length may be a result of overall size rather than tail length specifically. More research and analyses are needed. 
 
 
 \newpage
