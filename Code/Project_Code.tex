@@ -222,7 +222,7 @@ groups. More information on the sources used can be found at:
 \end{Shaded}
 
 \begin{verbatim}
-##  [1] "Family"           "Species_number"   "Species_name"     "English_name"    
+##  [1] "ï..Family"        "Species_number"   "Species_name"     "English_name"    
 ##  [5] "Subspecies"       "M_mass"           "M_mass_N"         "F_mass"          
 ##  [9] "F_mass_N"         "unsexed_mass"     "unsexed_mass_N"   "M_wing"          
 ## [13] "M_wing_N"         "F_wing"           "F_wing_N"         "Unsexed_wing"    
@@ -234,60 +234,6 @@ groups. More information on the sources used can be found at:
 ## [37] "Egg_mass"         "Mating_System"    "Display"          "Resource"        
 ## [41] "References"
 \end{verbatim}
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\CommentTok{\#variable types}
-\FunctionTok{str}\NormalTok{(birds)}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{verbatim}
-## 'data.frame':    3769 obs. of  41 variables:
-##  $ Family          : int  115 101 116 116 116 116 116 116 116 116 ...
-##  $ Species_number  : int  5351 3964 5402 5398 5400 5401 5396 5405 5404 5397 ...
-##  $ Species_name    : chr  "Acanthagenys rufogularis" "Acanthisitta chloris" "Acanthiza chrysorrhoa" "Acanthiza ewingii" ...
-##  $ English_name    : chr  "Spiny-cheeked Honeyeater" "Rifleman" "Yellow-rumped Thornbill" "Tasmanian Thornbill" ...
-##  $ Subspecies      : chr  "-999" "-999" "leighi" "ewingii" ...
-##  $ M_mass          : num  47.1 5.6 9.4 7.2 7.2 5.8 6.8 7.6 6.5 7.4 ...
-##  $ M_mass_N        : int  4 33 25 16 43 16 10 25 27 37 ...
-##  $ F_mass          : num  41.4 7 9.8 6.7 6.9 5.7 6.7 7.4 6.3 6.5 ...
-##  $ F_mass_N        : int  5 20 16 19 76 12 7 27 23 20 ...
-##  $ unsexed_mass    : num  -999 -999 -999 -999 -999 -999 -999 -999 -999 -999 ...
-##  $ unsexed_mass_N  : int  -999 -999 -999 -999 -999 -999 -999 -999 -999 -999 ...
-##  $ M_wing          : num  113.1 47.8 57.8 52.7 48.9 ...
-##  $ M_wing_N        : int  25 10 25 21 28 29 11 36 25 52 ...
-##  $ F_wing          : num  107.5 51.4 57.6 51 47 ...
-##  $ F_wing_N        : num  21 10 26 22 26 25 7 26 29 30 ...
-##  $ Unsexed_wing    : num  -999 -999 -999 -999 -999 -999 -999 -999 -999 -999 ...
-##  $ Unsexed_wing_N  : int  -999 -999 -999 -999 -999 -999 -999 -999 -999 -999 ...
-##  $ M_tarsus        : num  26.2 19.1 17.7 21.3 18 18.4 18.5 17.5 17.4 20.3 ...
-##  $ M_tarsus_N      : int  10 10 23 21 28 29 11 36 25 51 ...
-##  $ F_tarsus        : num  25.7 19.7 17.4 21.7 17.8 17.6 18.4 17.5 17.3 19.3 ...
-##  $ F_tarsus_N      : int  5 7 24 23 25 25 7 25 27 29 ...
-##  $ Unsexed_tarsus  : num  -999 -999 -999 -999 -999 -999 -999 -999 -999 -999 ...
-##  $ Unsexed_tarsus_N: int  -999 -999 -999 -999 -999 -999 -999 -999 -999 -999 ...
-##  $ M_bill          : num  26.8 13.2 11.9 11 11.3 9.7 11.6 10.2 10 11 ...
-##  $ M_bill_N        : int  8 6 24 21 27 28 11 26 24 51 ...
-##  $ F_bill          : num  25.5 14.4 11.7 10.9 11.4 9.6 11.2 9.9 10 10.5 ...
-##  $ F_bill_N        : num  10 7 26 23 25 24 7 26 28 29 ...
-##  $ Unsexed_bill    : num  -999 -999 -999 -999 -999 -999 -999 -999 -999 -999 ...
-##  $ Unsexed_bill_N  : int  -999 -999 -999 -999 -999 -999 -999 -999 -999 -999 ...
-##  $ M_tail          : num  113.4 23.3 40.8 47.8 36.3 ...
-##  $ M_tail_N        : int  25 10 28 21 34 28 11 36 14 51 ...
-##  $ F_tail          : num  106.4 22.1 39.3 46.8 35.4 ...
-##  $ F_tail_N        : int  21 7 26 23 55 25 6 26 10 30 ...
-##  $ Unsexed_tail    : num  -999 -999 -999 -999 -999 -999 -999 -999 -999 -999 ...
-##  $ Unsexed_tail_N  : int  -999 -999 -999 -999 -999 -999 -999 -999 -999 -999 ...
-##  $ Clutch_size     : num  2.2 4 3.5 3.5 3 3 2.5 3 3 3 ...
-##  $ Egg_mass        : num  5.45 1.34 1.44 1.46 1.35 0.93 -999 1.32 1.34 1.4 ...
-##  $ Mating_System   : int  2 2 2 2 2 -999 -999 2 2 2 ...
-##  $ Display         : int  3 1 1 1 -999 1 -999 2 -999 1 ...
-##  $ Resource        : int  2 2 1 0 1 1 -999 0 -999 2 ...
-##  $ References      : chr  "1, 21" "21" "1, 22, 31 " "22, 31" ...
-\end{verbatim}
-
-\newpage
 
 \hypertarget{data-wrangling}{%
 \section{Data Wrangling}\label{data-wrangling}}
@@ -375,6 +321,37 @@ M\_tail & 4 & 2390 & 92.410126 & 64.27592 & 15.8 & 762.0 & 746.2 & 1.3147688\\
 \hline
 Clutch\_size & 5 & 2392 & 3.448037 & 1.88880 & 1.0 & 18.6 & 17.6 & 0.0386194\\
 \hline
+\end{tabular}
+\end{table}
+
+\begin{table}
+
+\caption{\label{tab:summary table 2}Summary Statistics for Categorical Variables}
+\centering
+\begin{tabular}[t]{lll}
+\toprule
+Variable & N & Percent\\
+\midrule
+Mating_System & 1218 & \\
+... 1 & 23 & 1.9%\\
+... 2 & 1057 & 86.8%\\
+... 3 & 36 & 3%\\
+... 4 & 46 & 3.8%\\
+\addlinespace
+... 5 & 56 & 4.6%\\
+Display & 1218 & \\
+... 1 & 549 & 45.1%\\
+... 2 & 118 & 9.7%\\
+... 3 & 311 & 25.5%\\
+\addlinespace
+... 4 & 186 & 15.3%\\
+... 5 & 54 & 4.4%\\
+Resource & 1574 & \\
+... 0 & 480 & 30.5%\\
+... 1 & 780 & 49.6%\\
+\addlinespace
+... 2 & 314 & 19.9%\\
+\bottomrule
 \end{tabular}
 \end{table}
 
@@ -494,21 +471,11 @@ mass.
 ##      1.564475      4.086442      4.876822
 \end{verbatim}
 
-\begin{figure}
-\centering
 \includegraphics{Project_Code_files/figure-latex/q-1_residuals-1.pdf}
-\caption{Residual Plots for Question 1}
-\end{figure}
-
 \newpage
 
 Below: clutch size declines with increasing female tail length.
-
-\begin{figure}
-\centering
 \includegraphics{Project_Code_files/figure-latex/q-1_plot_main-1.pdf}
-\caption{Female Tail Length vs Clutch Size}
-\end{figure}
 
 \newpage
 
@@ -616,7 +583,7 @@ Here is the final model:
 
 \newpage
 
-Below, average mail tail length by mating system and display system.
+Below, average male tail length by mating system and display system.
 
 \begin{figure}
 \centering
@@ -628,12 +595,7 @@ Below, average mail tail length by mating system and display system.
 
 Below, the same results as the previous page but with the mating system
 and display system swapped.
-
-\begin{figure}
-\centering
 \includegraphics{Project_Code_files/figure-latex/q-2-plots2-1.pdf}
-\caption{Male Tail Length vs Mating Tactics}
-\end{figure}
 
 \newpage
 

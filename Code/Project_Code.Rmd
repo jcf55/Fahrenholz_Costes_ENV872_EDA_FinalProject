@@ -78,12 +78,14 @@ The complete dataset (represented below by the variable `birds`) includes 41 var
 dim(birds)
 #column names
 colnames(birds)
+```
+
+``` {r explore_no_include, include = FALSE}
 #variable types
+#this information is in the README file
 str(birds)
 
 ```
-
-\newpage
 
 # Data Wrangling
 ```{r wrangle_the_data, warning = FALSE, message = FALSE}
@@ -162,8 +164,10 @@ ggpairs(gg.birds.subset)
 birds_summary <- describe(birds.subset[,c("F_mass", "M_mass", "F_tail", "M_tail", "Clutch_size")], fast = T)
 
 kable(birds_summary, caption = "Summary Statistics for Continuous Variables")
+```
 
-# sumtable(birds.subset, vars = c("Mating_System", "Display", "Resource"), title = "Summary Statistics for Categorical Variables")
+``` {r summary table 2, echo = FALSE}
+sumtable(birds.subset, vars = c("Mating_System", "Display", "Resource"), title = "Summary Statistics for Categorical Variables")
 # Mating_System is VERY uneven; this could mean uneven variance in ANOVA
 ```
 
@@ -183,7 +187,6 @@ ggplot(birds.subset) +
 ### Female versus Male Tail Length
 
 As part of our exploration, we ran a regression to assess how correlated male and female tail lengths are.
-
 
 ```{r tail_regression, echo = FALSE, warning = FALSE, message = FALSE}
 # Run regression to compare male and female tail length
@@ -301,15 +304,9 @@ plot(lm.tailmass)
 # Change settings back
 par(mfrow=c(1,1))
 ```
-
-
-
-
 \newpage
 
 Below: clutch size declines with increasing female tail length. 
-
-
 ```{r q-1_plot_main, echo = FALSE, warning = FALSE, message = FALSE, fig.cap = "Female Tail Length vs Clutch Size"}
 ggplot(subset(birds.subset, F_mass<5000), aes(x = F_tail, y = Clutch_size)) +
   geom_point(aes(color = F_mass), alpha = 0.8) +
@@ -355,8 +352,6 @@ with(birds.subset, bartlett.test(M_tail ~ Mating_System))
 \newpage
 
 Next, run model: 
-
-
 ```{r question_2_part_2, warning = FALSE}
 mating.anova <- aov(data = birds.subset, M_tail ~ Mating_System * Display * Resource)
 summary(mating.anova)
@@ -365,7 +360,6 @@ summary(mating.anova)
 \newpage
 
 Because not everything was significant, we used a nested model approach to reduce the model until all components were significant. 
-
 ```{r question_2_part_3, include = FALSE}
 # Reduce the model to achieve significance
 # Remove 3-way interaction
@@ -391,7 +385,6 @@ summary(mating.anova.4)
 
 Here is the final model:
 
-
 ```{r problem_2_final_model, warning = FALSE, message = FALSE}
 mating.anova.final <- aov(data = birds.subset, M_tail ~ Mating_System * Display)
 summary(mating.anova.final)
@@ -414,7 +407,7 @@ par(mfrow=c(1,1))
 
 \newpage
 
-Below, average mail tail length by mating system and display system.
+Below, average male tail length by mating system and display system.
 
 ```{r q-2-plots, echo = FALSE, warning = FALSE, fig.cap = "Male Tail Length vs Mating Tactics", fig.width = 7}
 # Graph results
@@ -430,8 +423,6 @@ ggplot(data = subset(subset(birds.subset, !is.na(Mating_System)), !is.na(Display
 \newpage
 
 Below, the same results as the previous page but with the mating system and display system swapped. 
-
-
 ```{r q-2-plots2, echo = FALSE, warning = FALSE, fig.cap = "Male Tail Length vs Mating Tactics", fig.width = 7}
 # Graph results
 ggplot(data = subset(subset(birds.subset, !is.na(Mating_System)), !is.na(Display)), aes(x = Display, y = M_tail, color = Mating_System)) +
@@ -452,10 +443,7 @@ ggplot(data = subset(subset(birds.subset, !is.na(Mating_System)), !is.na(Display
 
 The interaction between female mass and tail size predicts clutch size (p < 0.001, n = 1642, R^2^ = 0.022). In general, clutch size appears to decrease with increasing tail length, but this effect is mediated by overall body size as expressed by mass. 
 
-Limitations
-(do we need to run more assumption tests for this one?)
-* R2 is low - model doesn't explain very much of the variance
-* residuals plots - ?
+However, it is important to note the limitations of our model. Our model does not explain much of the variance, as seen from our low R^2^ value. We can also see that the residual plots are quite clumped together in each plot at a different location. More explanatory variables should be used to determine the impact of female mass and tail size on clutch size. 
 
 This finding supports our hypothesis that birds with longer tails may expend more resources collecting food because of their reduced agility. Therefore, they may have adapted to produce fewer eggs because they cannot care for as many chicks as more agile birds. More research is needed to substantiate this hypothesis as well as to better understand how overall body size mediates the effect. 
 
@@ -464,10 +452,7 @@ This finding supports our hypothesis that birds with longer tails may expend mor
 
 Mating system and display system interact to predict tail length (n = 476, p < 0.001), supporting our hypothesis. In general, mostly polygynous and promiscuous birds with mostly ground displays appear to have the longest tails. Among monogamous and mostly monogamous birds, those with aerial displays have the longest tails.
 
-Limitations, Part 2
-* tail is not normally distributed (consider transforming)
-* groups do not have equal variance (especially not surprising with Mating System because the vast majority of the bird species are Type 2 - Monogamous).
-* residual plots - ?
+This said, it should be noted that tail length is not normally distributed, which could be transformed in future analysis for more accurate results. Groups in this analysis also do not have equal variance, which is something that we knew prior to conducting our models. For example, in Mating System, most birds are identified as monogamous (2) leading to a skew in this data not because of lack of samples but rather lack of diversity in this area of collection. Similarly to part one, we find clumps of data points in the residual plots, but in this case they seem to reflect the unequal grouping of variables used within this anlaysis. There is vertical groups that are distinguishable across all plots, which is something that should be explored in the future, as an attempt to correct this or eliminate its overall impact on the data. 
 
 As described above, birds vary in tail length according to both their mating system and their display system. This finding is not surprising considering that male birds with particularly long tails are known to use them in courtship displays, so species of birds have developed varied tail lengths alongside specific mating behaviors. We chose not to control for overall in this model because increasingly complex statistical analyses are outside of the scope covered in this course, but the lack of control is a definitive limitation of this finding: some patterns of mating system and display predicting tail length may be a result of overall size rather than tail length specifically. More research and analyses are needed. 
 
