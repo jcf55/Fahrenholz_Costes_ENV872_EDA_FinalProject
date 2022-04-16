@@ -34,6 +34,7 @@ library(knitr)
 library(psych)
 library(agricolae)
 library(cowplot)
+library(vtable)
 
 # Set your ggplot theme
 ourtheme <- theme_bw(base_size = 12) +
@@ -139,6 +140,7 @@ write.csv(birds.subset, file = "../Data/Processed/birds_subset.csv")
 write.csv(birds.family, file = "../Data/Processed/birds_family.csv")
 ```
 
+\newpage
 # Exploration of Processed Data
 
 ```{r explore_processed_dataset, include = FALSE}
@@ -148,29 +150,25 @@ summary(birds.subset)
 str(birds.subset)
 ```
 
-```{r gg exploration, warning = FALSE, message = FALSE, fig.width = 9, fig.height = 9}
+```{r gg exploration, echo = FALSE, warning = FALSE, message = FALSE, fig.width = 9, fig.height = 9}
 # View variable distributions and relationships
 gg.birds.subset <- subset(birds.subset, select = -c(Family, Species_name, Genus))
 ggpairs(gg.birds.subset)
-
-# View the counts of our factor variables
-count(birds.subset, vars = Mating_System) 
-# SUPER uneven! Could be an issue for ANOVA because of likely uneven variances
-count(birds.subset, vars = Display) # Also uneven but not as bad
-count(birds.subset, vars = Resource) # Looks fine
 ```
 
-
+\newpage
 ```{r summary table, echo = FALSE}
 # Create summary table (using "psych" package)
 birds_summary <- describe(birds.subset[,c("F_mass", "M_mass", "F_tail", "M_tail", "Clutch_size")], fast = T)
 
 kable(birds_summary, caption = "Summary Statistics for Continuous Variables")
 
+#sumtable(birds.subset, vars = c("Mating_System", "Display", "Resource"), title = "Summary Statistics for Categorical Variables")
+# Mating_System is VERY uneven; this could mean uneven variance in ANOVA
 ```
 
 
-```{r exploratory_plots, echo = FALSE, warning = FALSE, fig.cap = "Exploratory Plot of Wrangled Data"}
+```{r exploratory_plots, include = FALSE, fig.cap = "Exploratory Plot of Clutch Size by Family"}
 # Boxplot of families vs clutch size
 ggplot(birds.subset) +
   geom_boxplot(aes(x = Family, y = Clutch_size)) +
@@ -179,7 +177,36 @@ ggplot(birds.subset) +
   ylab("Clutch Size")
 ```
 
-```{r r exploratory_plots_1, echo = FALSE, warning = FALSE, fig.cap = "Exploratory Plot of Wrangled Data"}
+
+\newpage
+As part of our exploration, we ran a regression to assess how correlated male and female tail lengths are.
+```{r tail_regression, echo = FALSE, warning = FALSE, message = FALSE}
+# Run regression to compare male and female tail length
+lm.tail <- lm(data = birds.subset, M_tail ~ F_tail)
+# Check summary
+summary(lm.tail) # highly correlated
+```
+
+The answer is very much so (p < 0.001, Adjusted R^2 = 0.924).
+
+\newpage
+
+Below, although male and female tail lengths are highly correlated, some male tail lengths are unusually higher in comparison with female tail lengths. These species may be ones where males have adapted longer tails via sexual selection. 
+
+
+```{r r exploratory_plots_3, echo = FALSE, message = FALSE, warning = FALSE, fig.cap = "The Relationship between Female and Male Tail Length"}
+ggplot(birds.subset, aes(x = F_tail, y = M_tail)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = F) +
+  labs(x = "Female Tail Length (mm)", y = "Male Tail Length (mm)")
+```
+
+\newpage
+
+To visualize the relationship between male and female tail length another way, here are the distributions of tail length sorted by family and divided by sex. 
+
+
+```{r r exploratory_plots_1, echo = FALSE, warning = FALSE, fig.cap = "Exploratory Plots of Tail Length by Sex and Family"}
 # Boxplot of families vs female tail
 plot.fam.ftail <- ggplot(birds.subset) +
   geom_boxplot(aes(x = Family, y = F_tail)) +
@@ -187,9 +214,7 @@ plot.fam.ftail <- ggplot(birds.subset) +
         axis.ticks.x = element_blank()) +
   ylab("Female Tail Length (mm)") +
   scale_y_continuous(limits = c(NA, 800))
-```
 
-```{r r exploratory_plots_2, echo = FALSE, warning = FALSE, fig.cap = "Exploratory Plot of Wrangled Data"}
 # Boxplot of families vs male tail
 plot.fam.mtail <- ggplot(birds.subset) +
   geom_boxplot(aes(x = Family, y = M_tail)) +
@@ -197,47 +222,38 @@ plot.fam.mtail <- ggplot(birds.subset) +
         axis.ticks.x = element_blank()) +
   ylab("Male Tail Length (mm)") +
   scale_y_continuous(limits = c(NA, 800))
-# Similar to female tail pattern but more extreme values probably represent families with sexual selection more impacting tail length
 
 plot_grid(plot.fam.ftail, plot.fam.mtail)
+# In some families, males have longer tails and/or a broader range of tail lengths. The tail lengths in these families are probably more impacted by sexual selection compared with other families.
 ```
 
-```{r regression}
-# Run regression to compare male and female tail length
-lm.tail <- lm(data = birds.subset, M_tail ~ F_tail)
-# Check summary
-summary(lm.tail) # highly correlated
-# View relationship
-```
-
-```{r r exploratory_plots_3, echo = FALSE, warning = FALSE, fig.cap = "Exploratory Plot of Wrangled Data"}
-ggplot(birds.subset, aes(x = F_tail, y = M_tail)) +
-  geom_point() +
-  geom_smooth(method = "lm", se = F) +
-  labs(x = "Female Tail Length (mm)", y = "Male Tail Length (mm)")
-# again, unusually high male tail lengths probably represent species with sexual selection more impacting tail length
-```
-
-```{r r exploratory_plots_4, echo = FALSE, warning = FALSE, fig.cap = "Exploratory Plot of Wrangled Data"}
+```{r r exploratory_plots_4, include = FALSE, warning = FALSE, fig.cap = "Male Tail Length by Mating System"}
+# Exploratory plot:
 # Boxplot of mating system vs male tail length
 ggplot(birds.subset) +
   geom_boxplot(aes(x = Mating_System, y = M_tail)) +
   labs(y = "Male Tail Length (mm)", x = "Mating System")
+# MS #5 appears higher and #1 appears lower (keeping in mind #2 likely has the most variance)
 ```
 
-```{r r exploratory_plots_5, echo = FALSE, warning = FALSE, fig.cap = "Exploratory Plot of Wrangled Data"}
+```{r r exploratory_plots_5, include = FALSE, warning = FALSE, fig.cap = "Male Tail Length by Display System"}
+# Exploratory plot:
 # Boxplot of display system vs male tail length
 ggplot(birds.subset) +
   geom_boxplot(aes(x = Display, y = M_tail)) +
   labs(y = "Male Tail Length (mm)")
+# Display #5 appears higher than the others
 ```
 
-```{r exploratory_plots_6, echo = FALSE, fig.cap = "Exploratory Plot of Wrangled Data"}
+```{r exploratory_plots_6, include = FALSE, fig.cap = "Male Tail Length by Resource System"}
+# Exploratory plot:
 # Boxplot of resource system vs male tail length
 ggplot(birds.subset) +
   geom_boxplot(aes(x = Resource, y = M_tail)) +
   labs(y = "Male Tail Length (mm)")
+# Resource #1 may be higher, but not much difference
 ```
+
 \newpage
 
 # Analysis
@@ -250,14 +266,16 @@ $H_0$ : There is no significant difference between female tail length and clutch
 
 $H_A$ : There is a significant difference between female tail length and clutch size.
 
-Prior to conducting this anlaysis, it was identified that there is a strong correlation between mass and tail length. We therefore included this variable in our model, to see the further implications of this. 
-
-
-```{r question_1, waring = FALSE, message = FALSE, echo = FALSE}
-# First, explore whether female mass and female tail length are correlated.
-# If they are highly correlated, then effects of tail length could be explained by mass.
-summary(with(birds.subset, lm(F_mass ~ F_tail)))
+```{r question_1_pre-analysis, include = FALSE}
+# First, explore whether female mass and female tail length are correlated. If they are highly correlated, then effects of tail length could be explained by mass.
+summary(with(birds.subset, lm(F_tail ~ F_mass)))
 # They are, though R2 is fairly low so mass doesn't explain most variation in tail length.
+```
+
+Prior to conducting this analysis, it was identified that there is a strong correlation between female mass and female tail length. This makes sense: in general, bigger birds will have longer tails. We therefore included the mass variable in our model, in order to measure the effect of tail on clutch size while controlling for the effect of mass. 
+
+
+```{r question_1, warning = FALSE, message = FALSE, echo = FALSE}
 
 # Do female mass and tail size predict clutch size?
 lm.tailmass <- with(birds.subset, lm(Clutch_size ~ F_tail * F_mass))
@@ -269,28 +287,23 @@ vif(lm.tailmass)
 # A VIF below 5 indicates acceptable level of multicollinearity
 ```
 
-```{r q -1 residuals, echo = FALSE, warning = FALSE, message= FALSE, fig.cap = "Residual Plots for Question 1"}
+```{r q-1_residuals, echo = FALSE, warning = FALSE, message= FALSE, fig.cap = "Residual Plots for Question 1"}
 # Change settings to view all residual plots at once
 par(mfrow=c(2,2))
 # View residuals 
 plot(lm.tailmass)
-# The Residuals vs. Fitted and Q-Q plots don't look great - maybe this would be a good question for a TA (how to interpret these)
 
 # Change settings back
 par(mfrow=c(1,1))
 ```
 
-``` {r q-1 plots, include = FALSE, fig.cap = "Female Mass vs Clutch Size"}
-# Plot the results
-ggplot(birds.subset[], aes(x = F_mass, y = Clutch_size)) +
-  geom_point(aes(color = F_tail), alpha = 1) +
-  geom_smooth(method = "lm", se = F, color = "seagreen4") +
-  labs(x = "Female Mass (g)", y = "Clutch Size", color = "Female Tail \nLength (mm)") +
-  scale_x_continuous(limits = c(0, 12000)) +
-  scale_color_viridis_c()
-```
 
-```{r q-1 plot zoom, echo = FALSE, warning = FALSE, message = FALSE, fig.cap = "Female Tail Length vs Clutch Size"}
+\newpage
+
+Below, clutch size declines with increasing female tail length. 
+
+
+```{r q-1_plot_main, echo = FALSE, warning = FALSE, message = FALSE, fig.cap = "Female Tail Length vs Clutch Size"}
 ggplot(subset(birds.subset, F_mass<5000), aes(x = F_tail, y = Clutch_size)) +
   geom_point(aes(color = F_mass), alpha = 0.8) +
   geom_smooth(method = "lm", se = F, color = "seagreen4") +
@@ -300,6 +313,16 @@ ggplot(subset(birds.subset, F_mass<5000), aes(x = F_tail, y = Clutch_size)) +
   scale_y_continuous(limits = c(NA,15))
 ```
 
+``` {r q-1_plot_control, include = FALSE, fig.cap = "Female Mass vs Clutch Size"}
+# Plot the results
+ggplot(birds.subset[], aes(x = F_mass, y = Clutch_size)) +
+  geom_point(aes(color = F_tail), alpha = 1) +
+  geom_smooth(method = "lm", se = F, color = "seagreen4") +
+  labs(x = "Female Mass (g)", y = "Clutch Size", color = "Female Tail \nLength (mm)") +
+  scale_x_continuous(limits = c(0, 12000)) +
+  scale_color_viridis_c()
+```
+
 \newpage
 
 ## Question 2: Does male tail length relate to mating approaches?
@@ -307,7 +330,9 @@ $H_0$ : Mating system and display behavior do not predict tail size.
 
 $H_A$ : Mating system and/or display behavior do predict tail size.
 
-```{r question_2, warning = FALSE}
+First, test for normality and equal variance:
+
+```{r question_2_part_1, echo = FALSE, warning = FALSE}
 #test for normality
 shapiro.test(birds.subset$M_tail) 
 # Not normally distributed
@@ -318,10 +343,23 @@ qqnorm(birds.subset$M_tail); qqline(birds.subset$M_tail)
 with(birds.subset, bartlett.test(M_tail ~ Display))
 with(birds.subset, bartlett.test(M_tail ~ Mating_System))
 # All significant; the variances are not equal
+```
 
+\newpage
+
+Next, run model: 
+
+
+```{r question_2_part_2, warning = FALSE}
 mating.anova <- aov(data = birds.subset, M_tail ~ Mating_System * Display * Resource)
 summary(mating.anova)
+```
 
+\newpage
+
+Because not everything was significant, we used a nested model approach to reduce the model until all components were significant. 
+
+```{r question_2_part_3, include = FALSE}
 # Reduce the model to achieve significance
 # Remove 3-way interaction
 mating.anova.1 <- update(mating.anova, .~.-Mating_System:Display:Resource) 
@@ -341,10 +379,15 @@ summary(mating.anova.4)
 # Everything is significant.
 # Not possible to run an AIC comparison because 
 #the models do not contain the same number of observations.
-# Go with mating.anova.4, which is M_tail ~ Mating_System * Display
+# Go with mating.anova.4
 ```
 
-```{r, eval = FALSE, warning = FALSE, message = FALSE}
+```{r problem_2_final_model, warning = FALSE, message = FALSE}
+mating.anova.final <- aov(data = birds.subset, M_tail ~ Mating_System * Display)
+summary(mating.anova.final)
+``` 
+
+```{r tukey, eval = FALSE, warning = FALSE, message = FALSE}
 #Grouping with Tukey HSD
 anova.group <- HSD.test(mating.anova.4, "M_tail", group = TRUE)
 anova.group
@@ -359,14 +402,34 @@ plot(mating.anova.4)
 par(mfrow=c(1,1))
 ```
 
-```{r q-2 plots, echo = FALSE, warning = FALSE, fig.cap = "Male Tail Length vs Mating Tactics", fig.width = 7}
+\newpage
+
+Below, average mail tail length by mating system and display system.
+
+```{r q-2-plots, echo = FALSE, warning = FALSE, fig.cap = "Male Tail Length vs Mating Tactics", fig.width = 7}
 # Graph results
 ggplot(data = subset(subset(birds.subset, !is.na(Mating_System)), !is.na(Display)), aes(x = Mating_System, y = M_tail, color = Display)) +
   geom_boxplot() +
-  labs(x = "Mating System", y = "Average Tail Length (mm)") +
+  labs(x = "Mating System", y = "Average Male Tail Length (mm)") +
   scale_x_discrete(labels = c("Polyandry", "Monogamy", "Mostly Monogamy", "Mostly Polygyny", "Promiscuous")) +
   scale_color_discrete(labels = c("Ground Displays", "Mostly Ground", "Ground & Aerial", "Aerial, Non-Acrobatic", "Aerial, Acrobatic")) +
-  theme(axis.text.x = element_text(angle=90, vjust = 0.5, hjust =1))
+  theme(axis.text.x = element_text(angle=45, hjust = 1))
+
+```
+
+\newpage
+
+Below, the same results as the previous page but with the mating system and display system swapped. 
+
+
+```{r q-2-plots2, echo = FALSE, warning = FALSE, fig.cap = "Male Tail Length vs Mating Tactics", fig.width = 7}
+# Graph results
+ggplot(data = subset(subset(birds.subset, !is.na(Mating_System)), !is.na(Display)), aes(x = Display, y = M_tail, color = Mating_System)) +
+  geom_boxplot() +
+  labs(x = "Display System", y = "Average Male Tail Length (mm)", color = "Mating System") +
+  scale_x_discrete(labels = c("Ground Displays", "Mostly Ground", "Ground & Aerial", "Aerial, Non-Acrobatic", "Aerial, Acrobatic")) +
+  scale_color_discrete(labels = c("Polyandry", "Monogamy", "Mostly Monogamy", "Mostly Polygyny", "Promiscuous")) +
+  theme(axis.text.x = element_text(angle=45, hjust =1))
 
 ```
 
@@ -378,13 +441,15 @@ ggplot(data = subset(subset(birds.subset, !is.na(Mating_System)), !is.na(Display
 
 ## Part 1
 
-The interaction between female mass and tail size predicts clutch size (p < 0.001, n = 1642, R^2^ = 0.022). The effect of female tail size varies depending on the mass of the species. 
-* tail is negative; mass is positive; interaction is negative. I can't remember how to interpret all this with the interaction
+The interaction between female mass and tail size predicts clutch size (p < 0.001, n = 1642, R^2^ = 0.022). In general, clutch size appears to decrease with increasing tail length, but this effect is mediated by overall body size as expressed by mass. 
 
-Limitations, Part 1
+Limitations
 (do we need to run more assumption tests for this one?)
 * R2 is low - model doesn't explain very much of the variance
 * residuals plots - ?
+
+This finding supports our hypothesis that birds with longer tails may expend more resources collecting food because of their reduced agility and therefore can raise smaller broods. More research is needed to substantiate this hypothesis as well as to better understand how overall body size mediates the effect. 
+
 
 ## Part 2
 
@@ -393,7 +458,6 @@ Mating system and display system together predict tail length (n = 476, is the p
 Limitations, Part 2
 * tail is not normally distributed (consider transforming)
 * groups do not have equal variance (especially not surprising with Mating System because the vast majority of the bird species are Type 2 - Monogamous).
-* Need to check R2 for this one
 * residual plots - ?
 
 
