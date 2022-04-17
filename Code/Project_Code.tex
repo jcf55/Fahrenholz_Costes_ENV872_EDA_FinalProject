@@ -294,38 +294,6 @@ View dimensions, column names, variable type, and head of each column:
 \end{Highlighting}
 \end{Shaded}
 
-\begin{Shaded}
-\begin{Highlighting}[]
-\CommentTok{\# Wrangle by family just to see what the results look like}
-
-\CommentTok{\# This function allows calculation of mode for categorical variables}
-\NormalTok{Mode }\OtherTok{\textless{}{-}} \ControlFlowTok{function}\NormalTok{(x) \{}
-\NormalTok{  ux }\OtherTok{\textless{}{-}} \FunctionTok{unique}\NormalTok{(x) }
-\NormalTok{  ux[}\FunctionTok{which.max}\NormalTok{(}\FunctionTok{tabulate}\NormalTok{(}\FunctionTok{match}\NormalTok{(x, ux)))]}
-\NormalTok{\}}
-
-\CommentTok{\# Group by family, average by mean or mode}
-\NormalTok{birds.family }\OtherTok{\textless{}{-}}\NormalTok{ birds.subset }\SpecialCharTok{\%\textgreater{}\%}
-  \FunctionTok{group\_by}\NormalTok{(Family) }\SpecialCharTok{\%\textgreater{}\%} 
-  \FunctionTok{summarise}\NormalTok{(}\AttributeTok{F\_mass =} \FunctionTok{mean}\NormalTok{(F\_mass, }\AttributeTok{na.rm =} \ConstantTok{TRUE}\NormalTok{),}
-            \AttributeTok{M\_mass =} \FunctionTok{mean}\NormalTok{(M\_mass, }\AttributeTok{na.rm =} \ConstantTok{TRUE}\NormalTok{),}
-            \AttributeTok{F\_tail =} \FunctionTok{mean}\NormalTok{(F\_tail, }\AttributeTok{na.rm =} \ConstantTok{TRUE}\NormalTok{),}
-            \AttributeTok{M\_tail =} \FunctionTok{mean}\NormalTok{(M\_tail, }\AttributeTok{na.rm =} \ConstantTok{TRUE}\NormalTok{),}
-            \AttributeTok{Clutch\_size =} \FunctionTok{mean}\NormalTok{(Clutch\_size, }\AttributeTok{na.rm =} \ConstantTok{TRUE}\NormalTok{),}
-            \AttributeTok{Common\_Mating\_System =} \FunctionTok{Mode}\NormalTok{(Mating\_System),}
-            \AttributeTok{Common\_Display =} \FunctionTok{Mode}\NormalTok{(Display),}
-            \AttributeTok{Common\_Resource =} \FunctionTok{Mode}\NormalTok{(Resource)) }\SpecialCharTok{\%\textgreater{}\%}
-  \FunctionTok{filter}\NormalTok{(}\SpecialCharTok{!}\FunctionTok{is.na}\NormalTok{(Clutch\_size), }\SpecialCharTok{!}\FunctionTok{is.na}\NormalTok{(F\_tail), }
-         \SpecialCharTok{!}\FunctionTok{is.na}\NormalTok{(F\_mass), }\SpecialCharTok{!}\FunctionTok{is.na}\NormalTok{(M\_tail))}
-
-\CommentTok{\# View relationships between variables}
-\FunctionTok{ggpairs}\NormalTok{(birds.family, }\AttributeTok{columns =} \DecValTok{2}\SpecialCharTok{:}\DecValTok{9}\NormalTok{)}
-
-\CommentTok{\# Write the file into CSV}
-\FunctionTok{write.csv}\NormalTok{(birds.family, }\AttributeTok{file =} \StringTok{"../Data/Processed/birds\_family.csv"}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
-
 \newpage
 
 \hypertarget{exploration-of-processed-data}{%
@@ -727,7 +695,7 @@ quite clumped together in each plot at a different location. More
 explanatory variables should be used to determine the impact of female
 mass and tail size on clutch size.
 
-This finding supports our hypothesis that birds with longer tails may
+Our finding supports the hypothesis that birds with longer tails may
 expend more resources collecting food because of their reduced agility.
 Therefore, they may have adapted to produce fewer eggs because they
 cannot care for as many chicks as more agile birds. More research is
@@ -752,8 +720,8 @@ have the longest tails. Among monogamous and mostly monogamous birds,
 those with aerial displays have the longest tails.
 
 This said, it should be noted that tail length is not normally
-distributed, which could be transformed in future analysis for more
-accurate results. Groups in this analysis also do not have equal
+distributed, and could be transformed in future analysis to meet the
+normality assumption. Groups in this analysis also do not have equal
 variance. For example, in Mating System, most birds are identified as
 monogamous (2), leading to a skew in the data, not because of lack of
 samples but rather lack of diversity in this category. Similarly to part
@@ -763,17 +731,17 @@ this analysis. There are vertical groups that are distinguishable across
 all plots, which is something that should be explored in the future, as
 an attempt to correct this or eliminate its overall impact on the data.
 
-As described above, birds vary in tail length according to both their
-mating system and their display system. This finding is not surprising
-considering that male birds with particularly long tails are known to
-use them in courtship displays, so species of birds have developed
-varied tail lengths alongside specific mating behaviors. We chose not to
-control for overall mass in this model because increasingly complex
-statistical analyses are outside of the scope covered in this course,
-but the lack of control is a definitive limitation of this finding: some
-patterns of mating system and display predicting tail length may be a
-result of overall size rather than tail length specifically. More
-research and analyses are needed.
+Our result indicates that birds vary in tail length according to both
+their mating system and their display system. This finding is not
+surprising considering that male birds with particularly long tails are
+known to use them in courtship displays, so species of birds have
+developed varied tail lengths alongside specific mating behaviors. We
+chose not to control for overall mass in this model because increasingly
+complex statistical analyses are outside of the scope covered in this
+course, but the lack of control is a definitive limitation of this
+finding: some patterns of mating system and display predicting tail
+length may be a result of overall size rather than tail length
+specifically. More research and analyses are needed.
 
 \begin{figure}
 \centering
