@@ -142,25 +142,27 @@ Mating Tactics}
 Questions}\label{rationale-and-research-questions}}
 
 According to the study from which this data was extracted, avian body
-size and the evolution of birds over time is a highly debated subject
-matter. Generally, there is agreement around the idea that body size of
-bird species relates to other characteristics. This project intends to
-explore the correlation between body size and other characteristics in
+size and the evolution of birds over time is a subject matter that has
+generated much debate. Generally, there is agreement around the idea
+that body size of bird species relates to other characteristics, but the
+role of evolution continues to be disputed. This project intends to
+explore the correlation between tail length and other characteristics in
 our data.
 
-First, we ask the question if female tail size predicts clutch size.
+First, we ask the question if female tail length predicts clutch size.
 Tail length has a significant impact on control and agility (Evans
-1999). Longer tails increase crash risk as well as reduces the ability
-to maneuver (Evans 1999). We believe that this may have an overall
+1999). Longer tails increase crash risk as well as reduce the ability to
+maneuver (Evans 1999). We believe that tail length may have an overall
 negative impact on clutch size, as birds with longer tail lengths may be
 less efficient at collecting food for their young.
 
 Second, we will explore interactions between male tail length and
-methods of display, mating system, and resource sharing systems. Tail
-length likely has a negative impact on navigation, and collecting food,
-while having a positive impact on sexual display. Physical
-characteristics of males are evaluated by females in search of a mate,
-but the importance of tail length may vary greatly by species.
+methods of display, mating system, and resource sharing systems. As
+stated above, tail length likely has a negative impact on navigation and
+collecting food, but male tail length has a positive impact on sexual
+display for many species. Physical characteristics of males are
+evaluated by females in search of a mate, but the importance of tail
+length may vary greatly by species.
 
 \begin{figure}
 \centering
@@ -171,9 +173,9 @@ but the importance of tail length may vary greatly by species.
 \hypertarget{dataset-information}{%
 \section{Dataset Information}\label{dataset-information}}
 
-Our dataset consists of data that was collected starting in 2005 and was
-last updated in January of 2007. Data for this collection come from
-regions that include:
+Our dataset consists of ornithological data that was collected starting
+in 2005 and was last updated in January of 2007. Data for this
+collection come from regions that include:
 
 \begin{itemize}
 \tightlist
@@ -191,7 +193,7 @@ regions that include:
   Antarctica
 \end{itemize}
 
-The complete dataset (represented below by the variable \texttt{birds})
+The complete dataset (represented by the object \textbf{\texttt{birds}})
 includes 41 variables and represents 125 families. According to the
 metadata, the majority of this information was gathered from
 ornithological handbooks, with some data obtained from personal
@@ -205,23 +207,7 @@ groups. More information on the sources used can be found at:
 \hypertarget{exploration-of-raw-data}{%
 \section{Exploration of Raw Data}\label{exploration-of-raw-data}}
 
-\begin{Shaded}
-\begin{Highlighting}[]
-\CommentTok{\#dimensions}
-\FunctionTok{dim}\NormalTok{(birds)}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{verbatim}
-## [1] 3769   41
-\end{verbatim}
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\CommentTok{\#column names, variable type, and head of each column}
-\FunctionTok{str}\NormalTok{(birds)}
-\end{Highlighting}
-\end{Shaded}
+View dimensions, column names, variable type, and head of each column:
 
 \begin{verbatim}
 ## 'data.frame':    3769 obs. of  41 variables:
@@ -297,6 +283,21 @@ groups. More information on the sources used can be found at:
   \FunctionTok{group\_by}\NormalTok{(Mating\_System) }\SpecialCharTok{\%\textgreater{}\%}
   \FunctionTok{summarise}\NormalTok{(}\AttributeTok{M\_tail =} \FunctionTok{mean}\NormalTok{(M\_tail, }\AttributeTok{na.rm =} \ConstantTok{TRUE}\NormalTok{))}
 
+\CommentTok{\# Set categorical variables as factors}
+\NormalTok{birds.subset}\SpecialCharTok{$}\NormalTok{Family }\OtherTok{\textless{}{-}} \FunctionTok{as.factor}\NormalTok{(birds.subset}\SpecialCharTok{$}\NormalTok{Family)}
+\NormalTok{birds.subset}\SpecialCharTok{$}\NormalTok{Mating\_System }\OtherTok{\textless{}{-}} \FunctionTok{as.factor}\NormalTok{(birds.subset}\SpecialCharTok{$}\NormalTok{Mating\_System)}
+\NormalTok{birds.subset}\SpecialCharTok{$}\NormalTok{Display }\OtherTok{\textless{}{-}} \FunctionTok{as.factor}\NormalTok{(birds.subset}\SpecialCharTok{$}\NormalTok{Display)}
+\NormalTok{birds.subset}\SpecialCharTok{$}\NormalTok{Resource }\OtherTok{\textless{}{-}} \FunctionTok{as.factor}\NormalTok{(birds.subset}\SpecialCharTok{$}\NormalTok{Resource)}
+
+\CommentTok{\# Write the csv file into our Processed data folder}
+\FunctionTok{write.csv}\NormalTok{(birds.subset, }\AttributeTok{file =} \StringTok{"../Data/Processed/birds\_subset.csv"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Wrangle by family just to see what the results look like}
+
 \CommentTok{\# This function allows calculation of mode for categorical variables}
 \NormalTok{Mode }\OtherTok{\textless{}{-}} \ControlFlowTok{function}\NormalTok{(x) \{}
 \NormalTok{  ux }\OtherTok{\textless{}{-}} \FunctionTok{unique}\NormalTok{(x) }
@@ -317,14 +318,10 @@ groups. More information on the sources used can be found at:
   \FunctionTok{filter}\NormalTok{(}\SpecialCharTok{!}\FunctionTok{is.na}\NormalTok{(Clutch\_size), }\SpecialCharTok{!}\FunctionTok{is.na}\NormalTok{(F\_tail), }
          \SpecialCharTok{!}\FunctionTok{is.na}\NormalTok{(F\_mass), }\SpecialCharTok{!}\FunctionTok{is.na}\NormalTok{(M\_tail))}
 
-\CommentTok{\# Set categorical variables as factors}
-\NormalTok{birds.subset}\SpecialCharTok{$}\NormalTok{Family }\OtherTok{\textless{}{-}} \FunctionTok{as.factor}\NormalTok{(birds.subset}\SpecialCharTok{$}\NormalTok{Family)}
-\NormalTok{birds.subset}\SpecialCharTok{$}\NormalTok{Mating\_System }\OtherTok{\textless{}{-}} \FunctionTok{as.factor}\NormalTok{(birds.subset}\SpecialCharTok{$}\NormalTok{Mating\_System)}
-\NormalTok{birds.subset}\SpecialCharTok{$}\NormalTok{Display }\OtherTok{\textless{}{-}} \FunctionTok{as.factor}\NormalTok{(birds.subset}\SpecialCharTok{$}\NormalTok{Display)}
-\NormalTok{birds.subset}\SpecialCharTok{$}\NormalTok{Resource }\OtherTok{\textless{}{-}} \FunctionTok{as.factor}\NormalTok{(birds.subset}\SpecialCharTok{$}\NormalTok{Resource)}
+\CommentTok{\# View relationships between variables}
+\FunctionTok{ggpairs}\NormalTok{(birds.family, }\AttributeTok{columns =} \DecValTok{2}\SpecialCharTok{:}\DecValTok{9}\NormalTok{)}
 
-\CommentTok{\# Write the csv file into our Processed data folder}
-\FunctionTok{write.csv}\NormalTok{(birds.subset, }\AttributeTok{file =} \StringTok{"../Data/Processed/birds\_subset.csv"}\NormalTok{)}
+\CommentTok{\# Write the file into CSV}
 \FunctionTok{write.csv}\NormalTok{(birds.family, }\AttributeTok{file =} \StringTok{"../Data/Processed/birds\_family.csv"}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
@@ -484,8 +481,8 @@ and divided by sex.
 To test our hypotheses using our subset data \texttt{birds.subset}, we
 will conduct a linear regression and an analysis of variance (ANOVA).
 Our first research question will be answered using a linear regression,
-while our second will be addressed with an ANOVA. Results will be
-clearly stated in words, and supplemented using graphing visualizations.
+while our second will be addressed with an ANOVA. Results will be stated
+in words and supplemented using graphing visualizations.
 
 \hypertarget{question-1-does-female-tail-length-predict-clutch-size}{%
 \subsection{Question 1: Does female tail length predict clutch
@@ -530,6 +527,10 @@ mass.
 ## Multiple R-squared:  0.02398,    Adjusted R-squared:  0.02219 
 ## F-statistic: 13.45 on 3 and 1642 DF,  p-value: 0.00000001141
 \end{verbatim}
+
+Yes, both mass and tail and their interaction are significant (p
+\textless{} 0.001). We can reject the null hypothesis and conclude that
+mass and tail predict clutch size.
 
 \hypertarget{assumptions}{%
 \subsubsection{Assumptions}\label{assumptions}}
@@ -612,8 +613,6 @@ A p-value below the 0.05 threshold from the Bartlett Test indicates that
 the variances differ significantly for both Mating System and Display
 System.
 
-\newpage
-
 \hypertarget{model-reduction}{%
 \subsubsection{Model Reduction}\label{model-reduction}}
 
@@ -653,6 +652,8 @@ Next, run the model:
 Because not everything was significant, we used a nested model approach
 to reduce the model until all components were significant.
 
+\newpage
+
 Here is the final model:
 
 \begin{Shaded}
@@ -673,7 +674,9 @@ Here is the final model:
 ## 3293 observations deleted due to missingness
 \end{verbatim}
 
-\newpage
+The interaction between mating system and display system is significant
+(p \textless{} 0.001). We can reject the null hypothesis and accept that
+mating system and display system predict male tail length.
 
 \hypertarget{residuals-1}{%
 \subsubsection{Residuals}\label{residuals-1}}
@@ -783,22 +786,25 @@ research and analyses are needed.
 \hypertarget{references}{%
 \section{References}\label{references}}
 
-Chotjuckdikul, N. 2017. Short-tailed Babbler: \emph{Pellorneum
-malaccense.} eBird. \url{https://ebird.org/species/shtbab1}
-
-Evans, M.R. 1999. The consequences of flight for the evolution of tail
-ornaments in birds. In: Adams, N.J. \& Slotow, R.H. (eds) \emph{Proc. 22
-Int. Ornithol.} Congr., Durban: 1823-1843. Johannesburg: BirdLife South
-Africa.
-
-Jearwattanakanok, A. 2019. Great Argus: \emph{Argusianus argus.} eBird.
-\url{https://ebird.org/species/grearg1}
-
-Lislevand, T., Figuerola, J., and Székely, T. 2007. Avian body sizes in
-relation to fecundity, mating system, display behavior, and resource
-sharing. \emph{Ecology} 88:1605.
-
-Lorenz, S. 2019. Ribbon-tailed Astrapia: \emph{Astrapia mayeri.} eBird.
-\url{https://ebird.org/species/ritast1}
+\begin{itemize}
+\item
+  Chotjuckdikul, N. 2017. Short-tailed Babbler: \emph{Pellorneum
+  malaccense.} eBird. \url{https://ebird.org/species/shtbab1}
+\item
+  Evans, M.R. 1999. The consequences of flight for the evolution of tail
+  ornaments in birds. In: Adams, N.J. \& Slotow, R.H. (eds) \emph{Proc.
+  22 Int. Ornithol. Congr.,} Durban: 1823-1843. Johannesburg: BirdLife
+  South Africa.
+\item
+  Jearwattanakanok, A. 2019. Great Argus: \emph{Argusianus argus.}
+  eBird. \url{https://ebird.org/species/grearg1}
+\item
+  Lislevand, T., Figuerola, J., and Székely, T. 2007. Avian body sizes
+  in relation to fecundity, mating system, display behavior, and
+  resource sharing. \emph{Ecology} 88:1605.
+\item
+  Lorenz, S. 2019. Ribbon-tailed Astrapia: \emph{Astrapia mayeri.}
+  eBird. \url{https://ebird.org/species/ritast1}
+\end{itemize}
 
 \end{document}

@@ -51,17 +51,17 @@ options(scipen = 10)
 
 # Rationale and Research Questions
 
-According to the study from which this data was extracted, avian body size and the evolution of birds over time is a highly debated subject matter. Generally, there is agreement around the idea that body size of bird species relates to other characteristics. This project intends to explore the correlation between body size and other characteristics in our data. 
+According to the study from which this data was extracted, avian body size and the evolution of birds over time is a subject matter that has generated much debate. Generally, there is agreement around the idea that body size of bird species relates to other characteristics, but the role of evolution continues to be disputed. This project intends to explore the correlation between tail length and other characteristics in our data. 
 
-First, we ask the question if female tail size predicts clutch size. Tail length has a significant impact on control and agility (Evans 1999). Longer tails increase crash risk as well as reduces the ability to maneuver (Evans 1999). We believe that this may have an overall negative impact on clutch size, as birds with longer tail lengths may be less efficient at collecting food for their young. 
+First, we ask the question if female tail length predicts clutch size. Tail length has a significant impact on control and agility (Evans 1999). Longer tails increase crash risk as well as reduce the ability to maneuver (Evans 1999). We believe that tail length may have an overall negative impact on clutch size, as birds with longer tail lengths may be less efficient at collecting food for their young. 
 
-Second, we will explore interactions between male tail length and methods of display, mating system, and resource sharing systems. Tail length likely has a negative impact on navigation, and collecting food, while having a positive impact on sexual display. Physical characteristics of males are evaluated by females in search of a mate, but the importance of tail length may vary greatly by species. 
+Second, we will explore interactions between male tail length and methods of display, mating system, and resource sharing systems. As stated above, tail length likely has a negative impact on navigation and collecting food, but male tail length has a positive impact on sexual display for many species. Physical characteristics of males are evaluated by females in search of a mate, but the importance of tail length may vary greatly by species. 
 
 ![A male Great Argus (*Argusianus argus*)](Images/crested_argus_pheasant.jpeg)
 
 # Dataset Information
 
-Our dataset consists of data that was collected starting in 2005 and was last updated in January of 2007. Data for this collection come from regions that include:
+Our dataset consists of ornithological data that was collected starting in 2005 and was last updated in January of 2007. Data for this collection come from regions that include:
 
 * Western Palearctic
 * Neararctic
@@ -70,15 +70,25 @@ Our dataset consists of data that was collected starting in 2005 and was last up
 * New Zealand
 * Antarctica
 
-The complete dataset (represented below by the variable `birds`) includes 41 variables and represents 125 families. According to the metadata, the majority of this information was gathered from ornithological handbooks, with some data obtained from personal communications with authors who published information on species bird groups. More information on the sources used can be found at: https://esapubs.org/archive/ecol/E088/096/metadata.htm (also in /Data/Raw in the .tex file) 
+The complete dataset (represented by the object **`birds`**) includes 41 variables and represents 125 families. According to the metadata, the majority of this information was gathered from ornithological handbooks, with some data obtained from personal communications with authors who published information on species bird groups. More information on the sources used can be found at: https://esapubs.org/archive/ecol/E088/096/metadata.htm (also in /Data/Raw in the .tex file) 
 
 \newpage
 
 # Exploration of Raw Data 
-```{r explore_the_full_data}
-#dimensions
+
+```{r explore_the_full_data1, include=FALSE}
+# dimensions
 dim(birds)
-#column names, variable type, and head of each column
+# column names
+colnames(birds)
+# summary of columns
+summary(birds)
+```
+
+View dimensions, column names, variable type, and head of each column:
+
+```{r explore_the_full_data2, echo = FALSE}
+# Data structure:
 str(birds)
 ```
 
@@ -109,6 +119,19 @@ birds.mating.tail <- birds.subset %>%
   group_by(Mating_System) %>%
   summarise(M_tail = mean(M_tail, na.rm = TRUE))
 
+# Set categorical variables as factors
+birds.subset$Family <- as.factor(birds.subset$Family)
+birds.subset$Mating_System <- as.factor(birds.subset$Mating_System)
+birds.subset$Display <- as.factor(birds.subset$Display)
+birds.subset$Resource <- as.factor(birds.subset$Resource)
+
+# Write the csv file into our Processed data folder
+write.csv(birds.subset, file = "../Data/Processed/birds_subset.csv")
+```
+
+```{r exploratory_family_wrangle, eval = FALSE, echo = FALSE}
+# Wrangle by family just to see what the results look like
+
 # This function allows calculation of mode for categorical variables
 Mode <- function(x) {
   ux <- unique(x) 
@@ -129,14 +152,10 @@ birds.family <- birds.subset %>%
   filter(!is.na(Clutch_size), !is.na(F_tail), 
          !is.na(F_mass), !is.na(M_tail))
 
-# Set categorical variables as factors
-birds.subset$Family <- as.factor(birds.subset$Family)
-birds.subset$Mating_System <- as.factor(birds.subset$Mating_System)
-birds.subset$Display <- as.factor(birds.subset$Display)
-birds.subset$Resource <- as.factor(birds.subset$Resource)
+# View relationships between variables
+ggpairs(birds.family, columns = 2:9)
 
-# Write the csv file into our Processed data folder
-write.csv(birds.subset, file = "../Data/Processed/birds_subset.csv")
+# Write the file into CSV
 write.csv(birds.family, file = "../Data/Processed/birds_family.csv")
 ```
 
@@ -280,7 +299,7 @@ ggplot(birds.subset) +
 
 # Analysis
 
-To test our hypotheses using our subset data `birds.subset`, we will conduct a linear regression and an analysis of variance (ANOVA). Our first research question will be answered using a linear regression, while our second will be addressed with an ANOVA. Results will be clearly stated in words, and supplemented using graphing visualizations. 
+To test our hypotheses using our subset data `birds.subset`, we will conduct a linear regression and an analysis of variance (ANOVA). Our first research question will be answered using a linear regression, while our second will be addressed with an ANOVA. Results will be stated in words and supplemented using graphing visualizations. 
 
 
 ## Question 1: Does female tail length predict clutch size?
@@ -306,6 +325,8 @@ summary(lm.tailmass)
 # Yes! Both mass and tail and their interaction are significant.
 # p < 0.001, R2 = 0.022
 ```
+
+Yes, both mass and tail and their interaction are significant (p < 0.001). We can reject the null hypothesis and conclude that mass and tail predict clutch size.
 
 ### Assumptions
 
@@ -381,8 +402,7 @@ with(birds.subset, bartlett.test(M_tail ~ Display))
 ```
 
 A p-value below the 0.05 threshold from the Bartlett Test indicates that the variances differ significantly for both Mating System and Display System.
-
-\newpage
+   
 
 ### Model Reduction
 
@@ -420,6 +440,8 @@ summary(mating.anova.4)
 # Go with mating.anova.4
 ```
 
+\newpage
+
 Here is the final model:
 
 ```{r problem_2_final_model, warning = FALSE, message = FALSE}
@@ -427,13 +449,14 @@ mating.anova.final <- aov(data = birds.subset, M_tail ~ Mating_System * Display)
 summary(mating.anova.final)
 ``` 
 
+The interaction between mating system and display system is significant (p < 0.001). We can reject the null hypothesis and accept that mating system and display system predict male tail length.
+
 ```{r tukey, include = FALSE, warning = FALSE, message = FALSE}
 #Grouping with Tukey HSD
 anova.group <- HSD.test(mating.anova.4, "M_tail", group = TRUE)
 anova.group
 ``` 
 
-\newpage
 
 ### Residuals
 
@@ -511,7 +534,7 @@ As described above, birds vary in tail length according to both their mating sys
 
 * Chotjuckdikul, N. 2017. Short-tailed Babbler: *Pellorneum malaccense.* eBird. https://ebird.org/species/shtbab1
 
-* Evans, M.R. 1999. The consequences of flight for the evolution of tail ornaments in birds. In: Adams, N.J. & Slotow, R.H. (eds) *Proc. 22 Int. Ornithol.* Congr., Durban: 1823-1843. Johannesburg: BirdLife South Africa.
+* Evans, M.R. 1999. The consequences of flight for the evolution of tail ornaments in birds. In: Adams, N.J. & Slotow, R.H. (eds) *Proc. 22 Int. Ornithol. Congr.,* Durban: 1823-1843. Johannesburg: BirdLife South Africa.
 
 * Jearwattanakanok, A. 2019. Great Argus: *Argusianus argus.* eBird. https://ebird.org/species/grearg1
 
