@@ -96,6 +96,16 @@ Mating Tactics}
 \newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
 \newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
 \newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\usepackage{longtable,booktabs,array}
+\usepackage{calc} % for calculating minipage widths
+% Correct order of tables after \paragraph or \subparagraph
+\usepackage{etoolbox}
+\makeatletter
+\patchcmd\longtable{\par}{\if@noskipsec\mbox{}\fi\par}{}{}
+\makeatother
+% Allow footnotes in longtable head/foot
+\IfFileExists{footnotehyper.sty}{\usepackage{footnotehyper}}{\usepackage{footnote}}
+\makesavenoteenv{longtable}
 \usepackage{graphicx}
 \makeatletter
 \def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
@@ -113,20 +123,6 @@ Mating Tactics}
 \providecommand{\tightlist}{%
   \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
 \setcounter{secnumdepth}{5}
-\usepackage{booktabs}
-\usepackage{longtable}
-\usepackage{array}
-\usepackage{multirow}
-\usepackage{wrapfig}
-\usepackage{float}
-\usepackage{colortbl}
-\usepackage{pdflscape}
-\usepackage{tabu}
-\usepackage{threeparttable}
-\usepackage{threeparttablex}
-\usepackage[normalem]{ulem}
-\usepackage{makecell}
-\usepackage{xcolor}
 \ifLuaTeX
   \usepackage{selnolig}  % disable illegal ligatures
 \fi
@@ -165,6 +161,12 @@ length likely has a negative impact on navigation, and collecting food,
 while having a positive impact on sexual display. Physical
 characteristics of males are evaluated by females in search of a mate,
 but the importance of tail length may vary greatly by species.
+
+\begin{figure}
+\centering
+\includegraphics{Images/crested_argus_pheasant.jpeg}
+\caption{A male Great Argus (\emph{Argusianus argus})}
+\end{figure}
 
 \hypertarget{dataset-information}{%
 \section{Dataset Information}\label{dataset-information}}
@@ -216,24 +218,57 @@ groups. More information on the sources used can be found at:
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\CommentTok{\#column names}
-\FunctionTok{colnames}\NormalTok{(birds)}
+\CommentTok{\#column names, variable type, and head of each column}
+\FunctionTok{str}\NormalTok{(birds)}
 \end{Highlighting}
 \end{Shaded}
 
 \begin{verbatim}
-##  [1] "ï..Family"        "Species_number"   "Species_name"     "English_name"    
-##  [5] "Subspecies"       "M_mass"           "M_mass_N"         "F_mass"          
-##  [9] "F_mass_N"         "unsexed_mass"     "unsexed_mass_N"   "M_wing"          
-## [13] "M_wing_N"         "F_wing"           "F_wing_N"         "Unsexed_wing"    
-## [17] "Unsexed_wing_N"   "M_tarsus"         "M_tarsus_N"       "F_tarsus"        
-## [21] "F_tarsus_N"       "Unsexed_tarsus"   "Unsexed_tarsus_N" "M_bill"          
-## [25] "M_bill_N"         "F_bill"           "F_bill_N"         "Unsexed_bill"    
-## [29] "Unsexed_bill_N"   "M_tail"           "M_tail_N"         "F_tail"          
-## [33] "F_tail_N"         "Unsexed_tail"     "Unsexed_tail_N"   "Clutch_size"     
-## [37] "Egg_mass"         "Mating_System"    "Display"          "Resource"        
-## [41] "References"
+## 'data.frame':    3769 obs. of  41 variables:
+##  $ Family          : int  115 101 116 116 116 116 116 116 116 116 ...
+##  $ Species_number  : int  5351 3964 5402 5398 5400 5401 5396 5405 5404 5397 ...
+##  $ Species_name    : chr  "Acanthagenys rufogularis" "Acanthisitta chloris" "Acanthiza chrysorrhoa" "Acanthiza ewingii" ...
+##  $ English_name    : chr  "Spiny-cheeked Honeyeater" "Rifleman" "Yellow-rumped Thornbill" "Tasmanian Thornbill" ...
+##  $ Subspecies      : chr  "-999" "-999" "leighi" "ewingii" ...
+##  $ M_mass          : num  47.1 5.6 9.4 7.2 7.2 5.8 6.8 7.6 6.5 7.4 ...
+##  $ M_mass_N        : int  4 33 25 16 43 16 10 25 27 37 ...
+##  $ F_mass          : num  41.4 7 9.8 6.7 6.9 5.7 6.7 7.4 6.3 6.5 ...
+##  $ F_mass_N        : int  5 20 16 19 76 12 7 27 23 20 ...
+##  $ unsexed_mass    : num  -999 -999 -999 -999 -999 -999 -999 -999 -999 -999 ...
+##  $ unsexed_mass_N  : int  -999 -999 -999 -999 -999 -999 -999 -999 -999 -999 ...
+##  $ M_wing          : num  113.1 47.8 57.8 52.7 48.9 ...
+##  $ M_wing_N        : int  25 10 25 21 28 29 11 36 25 52 ...
+##  $ F_wing          : num  107.5 51.4 57.6 51 47 ...
+##  $ F_wing_N        : num  21 10 26 22 26 25 7 26 29 30 ...
+##  $ Unsexed_wing    : num  -999 -999 -999 -999 -999 -999 -999 -999 -999 -999 ...
+##  $ Unsexed_wing_N  : int  -999 -999 -999 -999 -999 -999 -999 -999 -999 -999 ...
+##  $ M_tarsus        : num  26.2 19.1 17.7 21.3 18 18.4 18.5 17.5 17.4 20.3 ...
+##  $ M_tarsus_N      : int  10 10 23 21 28 29 11 36 25 51 ...
+##  $ F_tarsus        : num  25.7 19.7 17.4 21.7 17.8 17.6 18.4 17.5 17.3 19.3 ...
+##  $ F_tarsus_N      : int  5 7 24 23 25 25 7 25 27 29 ...
+##  $ Unsexed_tarsus  : num  -999 -999 -999 -999 -999 -999 -999 -999 -999 -999 ...
+##  $ Unsexed_tarsus_N: int  -999 -999 -999 -999 -999 -999 -999 -999 -999 -999 ...
+##  $ M_bill          : num  26.8 13.2 11.9 11 11.3 9.7 11.6 10.2 10 11 ...
+##  $ M_bill_N        : int  8 6 24 21 27 28 11 26 24 51 ...
+##  $ F_bill          : num  25.5 14.4 11.7 10.9 11.4 9.6 11.2 9.9 10 10.5 ...
+##  $ F_bill_N        : num  10 7 26 23 25 24 7 26 28 29 ...
+##  $ Unsexed_bill    : num  -999 -999 -999 -999 -999 -999 -999 -999 -999 -999 ...
+##  $ Unsexed_bill_N  : int  -999 -999 -999 -999 -999 -999 -999 -999 -999 -999 ...
+##  $ M_tail          : num  113.4 23.3 40.8 47.8 36.3 ...
+##  $ M_tail_N        : int  25 10 28 21 34 28 11 36 14 51 ...
+##  $ F_tail          : num  106.4 22.1 39.3 46.8 35.4 ...
+##  $ F_tail_N        : int  21 7 26 23 55 25 6 26 10 30 ...
+##  $ Unsexed_tail    : num  -999 -999 -999 -999 -999 -999 -999 -999 -999 -999 ...
+##  $ Unsexed_tail_N  : int  -999 -999 -999 -999 -999 -999 -999 -999 -999 -999 ...
+##  $ Clutch_size     : num  2.2 4 3.5 3.5 3 3 2.5 3 3 3 ...
+##  $ Egg_mass        : num  5.45 1.34 1.44 1.46 1.35 0.93 -999 1.32 1.34 1.4 ...
+##  $ Mating_System   : int  2 2 2 2 2 -999 -999 2 2 2 ...
+##  $ Display         : int  3 1 1 1 -999 1 -999 2 -999 1 ...
+##  $ Resource        : int  2 2 1 0 1 1 -999 0 -999 2 ...
+##  $ References      : chr  "1, 21" "21" "1, 22, 31 " "22, 31" ...
 \end{verbatim}
+
+\newpage
 
 \hypertarget{data-wrangling}{%
 \section{Data Wrangling}\label{data-wrangling}}
@@ -303,57 +338,84 @@ Data}\label{exploration-of-processed-data}}
 \includegraphics{Project_Code_files/figure-latex/gg exploration-1.pdf}
 
 \newpage
-\begin{table}
 
-\caption{\label{tab:summary table}Summary Statistics for Continuous Variables}
-\centering
-\begin{tabular}[t]{l|r|r|r|r|r|r|r|r}
-\hline
-  & vars & n & mean & sd & min & max & range & se\\
-\hline
-F\_mass & 1 & 2706 & 411.472616 & 2320.49997 & 1.8 & 100000.0 & 99998.2 & 44.6085053\\
-\hline
-M\_mass & 2 & 2822 & 436.692275 & 2585.46747 & 2.0 & 115000.0 & 114998.0 & 48.6699134\\
-\hline
-F\_tail & 3 & 2352 & 88.340901 & 59.91081 & 15.4 & 647.5 & 632.1 & 1.2353402\\
-\hline
-M\_tail & 4 & 2390 & 92.410126 & 64.27592 & 15.8 & 762.0 & 746.2 & 1.3147688\\
-\hline
-Clutch\_size & 5 & 2392 & 3.448037 & 1.88880 & 1.0 & 18.6 & 17.6 & 0.0386194\\
-\hline
-\end{tabular}
-\end{table}
-
-\begin{table}
-
-\caption{\label{tab:summary table 2}Summary Statistics for Categorical Variables}
-\centering
-\begin{tabular}[t]{lll}
+\begin{longtable}[]{@{}lrrrrrrrr@{}}
+\caption{Summary Statistics for Continuous Variables}\tabularnewline
 \toprule
-Variable & N & Percent\\
+& vars & n & mean & sd & min & max & range & se \\
 \midrule
-Mating_System & 1218 & \\
-... 1 & 23 & 1.9%\\
-... 2 & 1057 & 86.8%\\
-... 3 & 36 & 3%\\
-... 4 & 46 & 3.8%\\
-\addlinespace
-... 5 & 56 & 4.6%\\
-Display & 1218 & \\
-... 1 & 549 & 45.1%\\
-... 2 & 118 & 9.7%\\
-... 3 & 311 & 25.5%\\
-\addlinespace
-... 4 & 186 & 15.3%\\
-... 5 & 54 & 4.4%\\
-Resource & 1574 & \\
-... 0 & 480 & 30.5%\\
-... 1 & 780 & 49.6%\\
-\addlinespace
-... 2 & 314 & 19.9%\\
+\endfirsthead
+\toprule
+& vars & n & mean & sd & min & max & range & se \\
+\midrule
+\endhead
+F\_mass & 1 & 2706 & 411.472616 & 2320.49997 & 1.8 & 100000.0 & 99998.2
+& 44.6085053 \\
+M\_mass & 2 & 2822 & 436.692275 & 2585.46747 & 2.0 & 115000.0 & 114998.0
+& 48.6699134 \\
+F\_tail & 3 & 2352 & 88.340901 & 59.91081 & 15.4 & 647.5 & 632.1 &
+1.2353402 \\
+M\_tail & 4 & 2390 & 92.410126 & 64.27592 & 15.8 & 762.0 & 746.2 &
+1.3147688 \\
+Clutch\_size & 5 & 2392 & 3.448037 & 1.88880 & 1.0 & 18.6 & 17.6 &
+0.0386194 \\
 \bottomrule
-\end{tabular}
-\end{table}
+\end{longtable}
+
+\begin{longtable}[]{@{}lrrr@{}}
+\caption{Summary Statistics for Mating System}\tabularnewline
+\toprule
+Mating\_System & freq & pct\_valid & pct\_tot \\
+\midrule
+\endfirsthead
+\toprule
+Mating\_System & freq & pct\_valid & pct\_tot \\
+\midrule
+\endhead
+1 & 23 & 1.888341 & 0.6102414 \\
+2 & 1057 & 86.781609 & 28.0445742 \\
+3 & 36 & 2.955665 & 0.9551605 \\
+4 & 46 & 3.776683 & 1.2204829 \\
+5 & 56 & 4.597701 & 1.4858053 \\
+& 2551 & NA & 67.6837357 \\
+\bottomrule
+\end{longtable}
+
+\begin{longtable}[]{@{}lrrr@{}}
+\caption{Summary Statistics for Display System}\tabularnewline
+\toprule
+Display & freq & pct\_valid & pct\_tot \\
+\midrule
+\endfirsthead
+\toprule
+Display & freq & pct\_valid & pct\_tot \\
+\midrule
+\endhead
+1 & 549 & 45.073892 & 14.566198 \\
+2 & 118 & 9.688013 & 3.130804 \\
+3 & 311 & 25.533662 & 8.251526 \\
+4 & 186 & 15.270936 & 4.934996 \\
+5 & 54 & 4.433497 & 1.432741 \\
+& 2551 & NA & 67.683736 \\
+\bottomrule
+\end{longtable}
+
+\begin{longtable}[]{@{}lrrr@{}}
+\caption{Summary Statistics for Resource System}\tabularnewline
+\toprule
+Resource & freq & pct\_valid & pct\_tot \\
+\midrule
+\endfirsthead
+\toprule
+Resource & freq & pct\_valid & pct\_tot \\
+\midrule
+\endhead
+0 & 480 & 30.49555 & 12.735474 \\
+1 & 780 & 49.55527 & 20.695145 \\
+2 & 314 & 19.94917 & 8.331122 \\
+& 2195 & NA & 58.238259 \\
+\bottomrule
+\end{longtable}
 
 \newpage
 
@@ -386,13 +448,13 @@ male and female tail lengths are.
 ## F-statistic: 2.855e+04 on 1 and 2348 DF,  p-value: < 2.2e-16
 \end{verbatim}
 
-The answer is very much so (p \textless{} 0.001, Adjusted R\^{}2 =
-0.924).
+The answer is yes, they are correlated (p \textless{} 0.001, Adjusted
+R\^{}2 = 0.924).
 
 \newpage
 
 Below, although male and female tail lengths are highly correlated, some
-male tail lengths are unusually higher in comparison with female tail
+male tail lengths are unusually longer in comparison with female tail
 lengths. These species may be ones where males have adapted longer tails
 via sexual selection.
 
@@ -442,6 +504,9 @@ therefore included the mass variable in our model, in order to measure
 the effect of tail on clutch size while controlling for the effect of
 mass.
 
+\hypertarget{model}{%
+\subsubsection{Model}\label{model}}
+
 \begin{verbatim}
 ## 
 ## Call:
@@ -466,16 +531,41 @@ mass.
 ## F-statistic: 13.45 on 3 and 1642 DF,  p-value: 0.00000001141
 \end{verbatim}
 
+\hypertarget{assumptions}{%
+\subsubsection{Assumptions}\label{assumptions}}
+
+Check for multicollinearity. A VIF score below 5 indicates an acceptable
+level of multicollinearity:
+
 \begin{verbatim}
 ##        F_tail        F_mass F_tail:F_mass 
 ##      1.564475      4.086442      4.876822
 \end{verbatim}
 
+\hypertarget{residuals}{%
+\subsubsection{Residuals}\label{residuals}}
+
+Next, view residual plots:
+
+\begin{figure}
+\centering
 \includegraphics{Project_Code_files/figure-latex/q-1_residuals-1.pdf}
+\caption{Residual Plots for Question 1}
+\end{figure}
+
 \newpage
 
+\hypertarget{clutch-size-by-tail-length}{%
+\subsubsection{Clutch Size by Tail
+Length}\label{clutch-size-by-tail-length}}
+
 Below: clutch size declines with increasing female tail length.
+
+\begin{figure}
+\centering
 \includegraphics{Project_Code_files/figure-latex/q-1_plot_main-1.pdf}
+\caption{Female Tail Length vs Clutch Size}
+\end{figure}
 
 \newpage
 
@@ -486,6 +576,9 @@ approaches?}\label{question-2-does-male-tail-length-relate-to-mating-approaches}
 \(H_0\) : Mating system and display behavior do not predict tail size.
 
 \(H_A\) : Mating system and/or display behavior do predict tail size.
+
+\hypertarget{assumptions-1}{%
+\subsubsection{Assumptions}\label{assumptions-1}}
 
 First, test for normality and equal variance:
 
@@ -503,21 +596,28 @@ First, test for normality and equal variance:
 ## 
 ##  Bartlett test of homogeneity of variances
 ## 
-## data:  M_tail by Display
-## Bartlett's K-squared = 71.043, df = 4, p-value = 0.00000000000001367
+## data:  M_tail by Mating_System
+## Bartlett's K-squared = 102.13, df = 4, p-value < 2.2e-16
 \end{verbatim}
 
 \begin{verbatim}
 ## 
 ##  Bartlett test of homogeneity of variances
 ## 
-## data:  M_tail by Mating_System
-## Bartlett's K-squared = 102.13, df = 4, p-value < 2.2e-16
+## data:  M_tail by Display
+## Bartlett's K-squared = 71.043, df = 4, p-value = 0.00000000000001367
 \end{verbatim}
+
+A p-value below the 0.05 threshold from the Bartlett Test indicates that
+the variances differ significantly for both Mating System and Display
+System.
 
 \newpage
 
-Next, run model:
+\hypertarget{model-reduction}{%
+\subsubsection{Model Reduction}\label{model-reduction}}
+
+Next, run the model:
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -550,8 +650,6 @@ Next, run model:
 ## 3339 observations deleted due to missingness
 \end{verbatim}
 
-\newpage
-
 Because not everything was significant, we used a nested model approach
 to reduce the model until all components were significant.
 
@@ -575,6 +673,11 @@ Here is the final model:
 ## 3293 observations deleted due to missingness
 \end{verbatim}
 
+\newpage
+
+\hypertarget{residuals-1}{%
+\subsubsection{Residuals}\label{residuals-1}}
+
 \begin{figure}
 \centering
 \includegraphics{Project_Code_files/figure-latex/q-2 residual-1.pdf}
@@ -582,6 +685,10 @@ Here is the final model:
 \end{figure}
 
 \newpage
+
+\hypertarget{tail-length-by-mating-and-display-systems}{%
+\subsubsection{Tail Length by Mating and Display
+Systems}\label{tail-length-by-mating-and-display-systems}}
 
 Below, average male tail length by mating system and display system.
 
@@ -610,9 +717,12 @@ The interaction between female mass and tail size predicts clutch size
 general, clutch size appears to decrease with increasing tail length,
 but this effect is mediated by overall body size as expressed by mass.
 
-Limitations (do we need to run more assumption tests for this one?) * R2
-is low - model doesn't explain very much of the variance * residuals
-plots - ?
+However, it is important to note the limitations of our model. Our model
+does not explain much of the variance, as seen from our low
+R\textsuperscript{2} value. We can also see that the residual plots are
+quite clumped together in each plot at a different location. More
+explanatory variables should be used to determine the impact of female
+mass and tail size on clutch size.
 
 This finding supports our hypothesis that birds with longer tails may
 expend more resources collecting food because of their reduced agility.
@@ -620,6 +730,14 @@ Therefore, they may have adapted to produce fewer eggs because they
 cannot care for as many chicks as more agile birds. More research is
 needed to substantiate this hypothesis as well as to better understand
 how overall body size mediates the effect.
+
+\begin{figure}
+\centering
+\includegraphics{Images/short-tailed_babbler.jpeg}
+\caption{A Short-tailed Babbler (\emph{Pellorneum malaccense})}
+\end{figure}
+
+\newpage
 
 \hypertarget{part-2}{%
 \subsection{Part 2}\label{part-2}}
@@ -630,35 +748,57 @@ polygynous and promiscuous birds with mostly ground displays appear to
 have the longest tails. Among monogamous and mostly monogamous birds,
 those with aerial displays have the longest tails.
 
-Limitations, Part 2 * tail is not normally distributed (consider
-transforming) * groups do not have equal variance (especially not
-surprising with Mating System because the vast majority of the bird
-species are Type 2 - Monogamous). * residual plots - ?
+This said, it should be noted that tail length is not normally
+distributed, which could be transformed in future analysis for more
+accurate results. Groups in this analysis also do not have equal
+variance. For example, in Mating System, most birds are identified as
+monogamous (2), leading to a skew in the data, not because of lack of
+samples but rather lack of diversity in this category. Similarly to part
+one, we find clumps of data points in the residual plots, but in this
+case they seem to reflect the unequal grouping of variables used within
+this analysis. There are vertical groups that are distinguishable across
+all plots, which is something that should be explored in the future, as
+an attempt to correct this or eliminate its overall impact on the data.
 
 As described above, birds vary in tail length according to both their
 mating system and their display system. This finding is not surprising
 considering that male birds with particularly long tails are known to
 use them in courtship displays, so species of birds have developed
 varied tail lengths alongside specific mating behaviors. We chose not to
-control for overall in this model because increasingly complex
+control for overall mass in this model because increasingly complex
 statistical analyses are outside of the scope covered in this course,
 but the lack of control is a definitive limitation of this finding: some
 patterns of mating system and display predicting tail length may be a
 result of overall size rather than tail length specifically. More
 research and analyses are needed.
 
+\begin{figure}
+\centering
+\includegraphics{Images/ribbon-tailed_astrapia.jpeg}
+\caption{A Male Ribbon-tailed Astrapia (\emph{Astrapia mayeri})}
+\end{figure}
+
 \newpage
 
 \hypertarget{references}{%
 \section{References}\label{references}}
 
+Chotjuckdikul, N. 2017. Short-tailed Babbler: \emph{Pellorneum
+malaccense.} eBird. \url{https://ebird.org/species/shtbab1}
+
 Evans, M.R. 1999. The consequences of flight for the evolution of tail
-ornaments in birds. In: Adams, N.J. \& Slotow, R.H. (eds) Proc. 22 Int.
-Ornithol. Congr., Durban: 1823-1843. Johannesburg: BirdLife South
+ornaments in birds. In: Adams, N.J. \& Slotow, R.H. (eds) \emph{Proc. 22
+Int. Ornithol.} Congr., Durban: 1823-1843. Johannesburg: BirdLife South
 Africa.
+
+Jearwattanakanok, A. 2019. Great Argus: \emph{Argusianus argus.} eBird.
+\url{https://ebird.org/species/grearg1}
 
 Lislevand, T., Figuerola, J., and Székely, T. 2007. Avian body sizes in
 relation to fecundity, mating system, display behavior, and resource
-sharing. Ecology 88:1605.
+sharing. \emph{Ecology} 88:1605.
+
+Lorenz, S. 2019. Ribbon-tailed Astrapia: \emph{Astrapia mayeri.} eBird.
+\url{https://ebird.org/species/ritast1}
 
 \end{document}

@@ -34,7 +34,7 @@ library(knitr)
 library(psych)
 library(agricolae)
 library(cowplot)
-library(vtable)
+library(summarytools)
 
 # Set your ggplot theme
 ourtheme <- theme_bw(base_size = 12) +
@@ -57,6 +57,8 @@ First, we ask the question if female tail size predicts clutch size. Tail length
 
 Second, we will explore interactions between male tail length and methods of display, mating system, and resource sharing systems. Tail length likely has a negative impact on navigation, and collecting food, while having a positive impact on sexual display. Physical characteristics of males are evaluated by females in search of a mate, but the importance of tail length may vary greatly by species. 
 
+![A male Great Argus (*Argusianus argus*)](Images/crested_argus_pheasant.jpeg)
+
 # Dataset Information
 
 Our dataset consists of data that was collected starting in 2005 and was last updated in January of 2007. Data for this collection come from regions that include:
@@ -76,16 +78,12 @@ The complete dataset (represented below by the variable `birds`) includes 41 var
 ```{r explore_the_full_data}
 #dimensions
 dim(birds)
-#column names
-colnames(birds)
-```
-
-``` {r explore_no_include, include = FALSE}
-#variable types
-#this information is in the README file
+#column names, variable type, and head of each column
 str(birds)
-
 ```
+
+
+\newpage
 
 # Data Wrangling
 ```{r wrangle_the_data, warning = FALSE, message = FALSE}
@@ -159,17 +157,33 @@ ggpairs(gg.birds.subset)
 ```
 
 \newpage
-```{r summary table, echo = FALSE}
+```{r summary tables, echo = FALSE}
 # Create summary table (using "psych" package)
 birds_summary <- describe(birds.subset[,c("F_mass", "M_mass", "F_tail", "M_tail", "Clutch_size")], fast = T)
 
 kable(birds_summary, caption = "Summary Statistics for Continuous Variables")
+
+# Then create summary tables of categorical variables
+birds.subset %>%
+  select(Mating_System) %>%
+  freq(cumul = FALSE) %>%
+  tb() %>%
+  kable(caption = "Summary Statistics for Mating System")
+
+birds.subset %>%
+  select(Display) %>%
+  freq(cumul = FALSE) %>%
+  tb() %>%
+  kable(caption = "Summary Statistics for Display System")
+
+birds.subset %>%
+  select(Resource) %>%
+  freq(cumul = FALSE) %>%
+  tb() %>%
+  kable(caption = "Summary Statistics for Resource System")
+
 ```
 
-``` {r summary table 2, echo = FALSE}
-sumtable(birds.subset, vars = c("Mating_System", "Display", "Resource"), title = "Summary Statistics for Categorical Variables")
-# Mating_System is VERY uneven; this could mean uneven variance in ANOVA
-```
 
 
 ```{r exploratory_plots, include = FALSE, fig.cap = "Exploratory Plot of Clutch Size by Family"}
@@ -195,11 +209,11 @@ lm.tail <- lm(data = birds.subset, M_tail ~ F_tail)
 summary(lm.tail) # highly correlated
 ```
 
-The answer is very much so (p < 0.001, Adjusted R^2 = 0.924).
+The answer is yes, they are correlated (p < 0.001, Adjusted R^2 = 0.924).
 
 \newpage
 
-Below, although male and female tail lengths are highly correlated, some male tail lengths are unusually higher in comparison with female tail lengths. These species may be ones where males have adapted longer tails via sexual selection. 
+Below, although male and female tail lengths are highly correlated, some male tail lengths are unusually longer in comparison with female tail lengths. These species may be ones where males have adapted longer tails via sexual selection. 
 
 
 ```{r r exploratory_plots_3, echo = FALSE, message = FALSE, warning = FALSE, fig.cap = "The Relationship between Female and Male Tail Length"}
@@ -282,6 +296,7 @@ summary(with(birds.subset, lm(F_tail ~ F_mass)))
 
 Prior to conducting this analysis, it was identified that there is a strong correlation between female mass and female tail length. This makes sense: in general, bigger birds will have longer tails. We therefore included the mass variable in our model, in order to measure the effect of tail on clutch size while controlling for the effect of mass. 
 
+### Model
 
 ```{r question_1, warning = FALSE, message = FALSE, echo = FALSE}
 
@@ -290,10 +305,20 @@ lm.tailmass <- with(birds.subset, lm(Clutch_size ~ F_tail * F_mass))
 summary(lm.tailmass)
 # Yes! Both mass and tail and their interaction are significant.
 # p < 0.001, R2 = 0.022
+```
 
+### Assumptions
+
+Check for multicollinearity. A VIF score below 5 indicates an acceptable level of multicollinearity:
+
+```{r q-1_vif, warning = FALSE, message = FALSE, echo = FALSE}
 vif(lm.tailmass)
 # A VIF below 5 indicates acceptable level of multicollinearity
 ```
+
+### Residuals
+
+Next, view residual plots:
 
 ```{r q-1_residuals, echo = FALSE, warning = FALSE, message= FALSE, fig.cap = "Residual Plots for Question 1"}
 # Change settings to view all residual plots at once
@@ -304,9 +329,13 @@ plot(lm.tailmass)
 # Change settings back
 par(mfrow=c(1,1))
 ```
+
 \newpage
 
-Below: clutch size declines with increasing female tail length. 
+### Clutch Size by Tail Length
+
+Below: clutch size declines with increasing female tail length.
+
 ```{r q-1_plot_main, echo = FALSE, warning = FALSE, message = FALSE, fig.cap = "Female Tail Length vs Clutch Size"}
 ggplot(subset(birds.subset, F_mass<5000), aes(x = F_tail, y = Clutch_size)) +
   geom_point(aes(color = F_mass), alpha = 0.8) +
@@ -334,6 +363,8 @@ $H_0$ : Mating system and display behavior do not predict tail size.
 
 $H_A$ : Mating system and/or display behavior do predict tail size.
 
+### Assumptions
+
 First, test for normality and equal variance:
 
 ```{r question_2_part_1, echo = FALSE, warning = FALSE}
@@ -344,22 +375,28 @@ shapiro.test(birds.subset$M_tail)
 qqnorm(birds.subset$M_tail); qqline(birds.subset$M_tail)
 
 # test for equal variance
-with(birds.subset, bartlett.test(M_tail ~ Display))
 with(birds.subset, bartlett.test(M_tail ~ Mating_System))
+with(birds.subset, bartlett.test(M_tail ~ Display))
 # All significant; the variances are not equal
 ```
 
+A p-value below the 0.05 threshold from the Bartlett Test indicates that the variances differ significantly for both Mating System and Display System.
+
 \newpage
 
-Next, run model: 
+### Model Reduction
+
+Next, run the model: 
+
 ```{r question_2_part_2, warning = FALSE}
 mating.anova <- aov(data = birds.subset, M_tail ~ Mating_System * Display * Resource)
 summary(mating.anova)
 ```
 
-\newpage
 
 Because not everything was significant, we used a nested model approach to reduce the model until all components were significant. 
+
+
 ```{r question_2_part_3, include = FALSE}
 # Reduce the model to achieve significance
 # Remove 3-way interaction
@@ -396,6 +433,10 @@ anova.group <- HSD.test(mating.anova.4, "M_tail", group = TRUE)
 anova.group
 ``` 
 
+\newpage
+
+### Residuals
+
 ```{r q-2 residual, echo = FALSE, warning = FALSE, message = FALSE, fig.cap = "Residual Plots for Question 2"}
 # Change settings to view all residual plots at once
 par(mfrow=c(2,2))
@@ -406,6 +447,8 @@ par(mfrow=c(1,1))
 ```
 
 \newpage
+
+### Tail Length by Mating and Display Systems
 
 Below, average male tail length by mating system and display system.
 
@@ -448,20 +491,31 @@ However, it is important to note the limitations of our model. Our model does no
 This finding supports our hypothesis that birds with longer tails may expend more resources collecting food because of their reduced agility. Therefore, they may have adapted to produce fewer eggs because they cannot care for as many chicks as more agile birds. More research is needed to substantiate this hypothesis as well as to better understand how overall body size mediates the effect. 
 
 
+![A Short-tailed Babbler (*Pellorneum malaccense*)](Images/short-tailed_babbler.jpeg)
+
+\newpage
+
 ## Part 2
 
 Mating system and display system interact to predict tail length (n = 476, p < 0.001), supporting our hypothesis. In general, mostly polygynous and promiscuous birds with mostly ground displays appear to have the longest tails. Among monogamous and mostly monogamous birds, those with aerial displays have the longest tails.
 
-This said, it should be noted that tail length is not normally distributed, which could be transformed in future analysis for more accurate results. Groups in this analysis also do not have equal variance, which is something that we knew prior to conducting our models. For example, in Mating System, most birds are identified as monogamous (2) leading to a skew in this data not because of lack of samples but rather lack of diversity in this area of collection. Similarly to part one, we find clumps of data points in the residual plots, but in this case they seem to reflect the unequal grouping of variables used within this anlaysis. There is vertical groups that are distinguishable across all plots, which is something that should be explored in the future, as an attempt to correct this or eliminate its overall impact on the data. 
+This said, it should be noted that tail length is not normally distributed, which could be transformed in future analysis for more accurate results. Groups in this analysis also do not have equal variance. For example, in Mating System, most birds are identified as monogamous (2), leading to a skew in the data, not because of lack of samples but rather lack of diversity in this category. Similarly to part one, we find clumps of data points in the residual plots, but in this case they seem to reflect the unequal grouping of variables used within this analysis. There are vertical groups that are distinguishable across all plots, which is something that should be explored in the future, as an attempt to correct this or eliminate its overall impact on the data. 
 
-As described above, birds vary in tail length according to both their mating system and their display system. This finding is not surprising considering that male birds with particularly long tails are known to use them in courtship displays, so species of birds have developed varied tail lengths alongside specific mating behaviors. We chose not to control for overall in this model because increasingly complex statistical analyses are outside of the scope covered in this course, but the lack of control is a definitive limitation of this finding: some patterns of mating system and display predicting tail length may be a result of overall size rather than tail length specifically. More research and analyses are needed. 
+As described above, birds vary in tail length according to both their mating system and their display system. This finding is not surprising considering that male birds with particularly long tails are known to use them in courtship displays, so species of birds have developed varied tail lengths alongside specific mating behaviors. We chose not to control for overall mass in this model because increasingly complex statistical analyses are outside of the scope covered in this course, but the lack of control is a definitive limitation of this finding: some patterns of mating system and display predicting tail length may be a result of overall size rather than tail length specifically. More research and analyses are needed. 
 
+![A Male Ribbon-tailed Astrapia (*Astrapia mayeri*)](Images/ribbon-tailed_astrapia.jpeg)
 
 \newpage
 
 # References
 
-Evans, M.R. 1999. The consequences of flight for the evolution of tail ornaments in birds. In: Adams, N.J. & Slotow, R.H. (eds) Proc. 22 Int. Ornithol. Congr., Durban: 1823-1843. Johannesburg: BirdLife South Africa.
+* Chotjuckdikul, N. 2017. Short-tailed Babbler: *Pellorneum malaccense.* eBird. https://ebird.org/species/shtbab1
 
-Lislevand, T., Figuerola, J., and Székely, T. 2007. Avian body sizes in relation to fecundity, mating system, display behavior, and resource sharing. Ecology 88:1605.
+* Evans, M.R. 1999. The consequences of flight for the evolution of tail ornaments in birds. In: Adams, N.J. & Slotow, R.H. (eds) *Proc. 22 Int. Ornithol.* Congr., Durban: 1823-1843. Johannesburg: BirdLife South Africa.
+
+* Jearwattanakanok, A. 2019. Great Argus: *Argusianus argus.* eBird. https://ebird.org/species/grearg1
+
+* Lislevand, T., Figuerola, J., and Székely, T. 2007. Avian body sizes in relation to fecundity, mating system, display behavior, and resource sharing. *Ecology* 88:1605.
+
+* Lorenz, S. 2019. Ribbon-tailed Astrapia: *Astrapia mayeri.* eBird. https://ebird.org/species/ritast1
 
