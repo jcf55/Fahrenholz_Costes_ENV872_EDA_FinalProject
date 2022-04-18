@@ -259,40 +259,39 @@ View dimensions, column names, variable type, and head of each column:
 \hypertarget{data-wrangling}{%
 \section{Data Wrangling}\label{data-wrangling}}
 
-\begin{Shaded}
-\begin{Highlighting}[]
-\CommentTok{\# make sure family column is named correctly}
-\FunctionTok{colnames}\NormalTok{(birds)[}\DecValTok{1}\NormalTok{] }\OtherTok{\textless{}{-}} \StringTok{"Family"}
+After the raw dataset had been explored, it was wrangled to better suit
+our analyses. Unavailable datapoints were recoded from ``-999'' to
+``NA'', to be recognized by R as unavailable. Other variables were
+re-coded as needed. A genus column was added, and the dataset was
+modified to include only the following variables:
 
-\CommentTok{\# Convert {-}999 to NAs and add genus column}
-\NormalTok{birds }\OtherTok{\textless{}{-}}\NormalTok{ birds }\SpecialCharTok{\%\textgreater{}\%}
-  \FunctionTok{na\_if}\NormalTok{(., }\SpecialCharTok{{-}}\DecValTok{999}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
-  \FunctionTok{separate}\NormalTok{(Species\_name, }
-           \AttributeTok{sep =} \StringTok{" "}\NormalTok{, }
-           \AttributeTok{into =} \FunctionTok{c}\NormalTok{(}\StringTok{"Genus"}\NormalTok{, }\StringTok{"Sp"}\NormalTok{), }
-           \AttributeTok{remove =} \ConstantTok{FALSE}\NormalTok{)}
+\begin{itemize}
+\tightlist
+\item
+  Family
+\item
+  Genus
+\item
+  Species Name
+\item
+  Mass (both female and male)
+\item
+  Tail Length (both female and male)
+\item
+  Clutch Size
+\item
+  Mating System
+\item
+  Display System
+\item
+  Resource Sharing
+\end{itemize}
 
-\CommentTok{\# Subset to columns we are interested in}
-\NormalTok{birds.subset }\OtherTok{\textless{}{-}}\NormalTok{ birds }\SpecialCharTok{\%\textgreater{}\%}
-  \FunctionTok{select}\NormalTok{(Family, Species\_name, Genus, F\_mass, M\_mass, }
-\NormalTok{         F\_tail, M\_tail, Clutch\_size, Mating\_System, }
-\NormalTok{         Display, Resource)}
-
-\CommentTok{\# Group male tail length by mating system to graph later}
-\NormalTok{birds.mating.tail }\OtherTok{\textless{}{-}}\NormalTok{ birds.subset }\SpecialCharTok{\%\textgreater{}\%}
-  \FunctionTok{group\_by}\NormalTok{(Mating\_System) }\SpecialCharTok{\%\textgreater{}\%}
-  \FunctionTok{summarise}\NormalTok{(}\AttributeTok{M\_tail =} \FunctionTok{mean}\NormalTok{(M\_tail, }\AttributeTok{na.rm =} \ConstantTok{TRUE}\NormalTok{))}
-
-\CommentTok{\# Set categorical variables as factors}
-\NormalTok{birds.subset}\SpecialCharTok{$}\NormalTok{Family }\OtherTok{\textless{}{-}} \FunctionTok{as.factor}\NormalTok{(birds.subset}\SpecialCharTok{$}\NormalTok{Family)}
-\NormalTok{birds.subset}\SpecialCharTok{$}\NormalTok{Mating\_System }\OtherTok{\textless{}{-}} \FunctionTok{as.factor}\NormalTok{(birds.subset}\SpecialCharTok{$}\NormalTok{Mating\_System)}
-\NormalTok{birds.subset}\SpecialCharTok{$}\NormalTok{Display }\OtherTok{\textless{}{-}} \FunctionTok{as.factor}\NormalTok{(birds.subset}\SpecialCharTok{$}\NormalTok{Display)}
-\NormalTok{birds.subset}\SpecialCharTok{$}\NormalTok{Resource }\OtherTok{\textless{}{-}} \FunctionTok{as.factor}\NormalTok{(birds.subset}\SpecialCharTok{$}\NormalTok{Resource)}
-
-\CommentTok{\# Write the csv file into our Processed data folder}
-\FunctionTok{write.csv}\NormalTok{(birds.subset, }\AttributeTok{file =} \StringTok{"../Data/Processed/birds\_subset.csv"}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
+This dataset was saved as \textbf{``birds.subset''} and used for
+subsequent analyses. Finally, a second exploratory dataset was created
+to summarize the variables of interest by family. If further time
+allowed, the authors would have liked to group by higher taxonomic
+level, but this information was not readily accessible.
 
 \newpage
 
@@ -439,6 +438,36 @@ and divided by sex.
 \centering
 \includegraphics{Project_Code_files/figure-latex/r exploratory_plots_1-1.pdf}
 \caption{Exploratory Plots of Tail Length by Sex and Family}
+\end{figure}
+
+\hypertarget{exploratory-plots-for-part-2}{%
+\subsubsection{Exploratory Plots for Part
+2}\label{exploratory-plots-for-part-2}}
+
+In preparation for the second part of our analysis, the following plots
+show the distribution of male tail length according to each behavioral
+variable: mating system, display system, and resource system.
+
+\begin{figure}
+\centering
+\includegraphics{Project_Code_files/figure-latex/r exploratory_plots_4-1.pdf}
+\caption{Male Tail Length by Mating System}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics{Project_Code_files/figure-latex/r exploratory_plots_5-1.pdf}
+\caption{Male Tail Length by Display System}
+\end{figure}
+
+\begin{verbatim}
+## Warning: Removed 1379 rows containing non-finite values (stat_boxplot).
+\end{verbatim}
+
+\begin{figure}
+\centering
+\includegraphics{Project_Code_files/figure-latex/exploratory_plots_6-1.pdf}
+\caption{Male Tail Length by Resource System}
 \end{figure}
 
 \newpage

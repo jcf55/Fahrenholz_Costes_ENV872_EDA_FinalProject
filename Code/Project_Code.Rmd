@@ -96,7 +96,22 @@ str(birds)
 \newpage
 
 # Data Wrangling
-```{r wrangle_the_data, warning = FALSE, message = FALSE}
+
+After the raw dataset had been explored, it was wrangled to better suit our analyses. Unavailable datapoints were recoded from "-999" to "NA", to be recognized by R as unavailable. Other variables were re-coded as needed. A genus column was added, and the dataset was modified to include only the following variables:
+
+* Family
+* Genus
+* Species Name
+* Mass (both female and male)
+* Tail Length (both female and male)
+* Clutch Size
+* Mating System
+* Display System
+* Resource Sharing
+
+This dataset was saved as **"birds.subset"** and used for subsequent analyses. Finally, a second exploratory dataset was created to summarize the variables of interest by family. If further time allowed, the authors would have liked to group by higher taxonomic level, but this information was not readily accessible. 
+
+```{r wrangle_the_data, include = FALSE, warning = FALSE, message = FALSE}
 # make sure family column is named correctly
 colnames(birds)[1] <- "Family"
 
@@ -113,11 +128,6 @@ birds.subset <- birds %>%
   select(Family, Species_name, Genus, F_mass, M_mass, 
          F_tail, M_tail, Clutch_size, Mating_System, 
          Display, Resource)
-
-# Group male tail length by mating system to graph later
-birds.mating.tail <- birds.subset %>%
-  group_by(Mating_System) %>%
-  summarise(M_tail = mean(M_tail, na.rm = TRUE))
 
 # Set categorical variables as factors
 birds.subset$Family <- as.factor(birds.subset$Family)
@@ -268,30 +278,37 @@ plot_grid(plot.fam.ftail, plot.fam.mtail)
 # In some families, males have longer tails and/or a broader range of tail lengths. The tail lengths in these families are probably more impacted by sexual selection compared with other families.
 ```
 
-```{r r exploratory_plots_4, include = FALSE, warning = FALSE, fig.cap = "Male Tail Length by Mating System"}
+### Exploratory Plots for Part 2
+
+In preparation for the second part of our analysis, the following plots show the distribution of male tail length according to each behavioral variable: mating system, display system, and resource system.
+
+```{r r exploratory_plots_4, echo = FALSE, warning = FALSE, fig.cap = "Male Tail Length by Mating System"}
 # Exploratory plot:
 # Boxplot of mating system vs male tail length
 ggplot(birds.subset) +
   geom_boxplot(aes(x = Mating_System, y = M_tail)) +
-  labs(y = "Male Tail Length (mm)", x = "Mating System")
+  labs(y = "Male Tail Length (mm)", x = "Mating System") +
+  scale_x_discrete(labels = c("Polyandry", "Monogamy", "Mostly Monogamy", "Mostly Polygyny", "Promiscuous", "NA"))
 # MS #5 appears higher and #1 appears lower (keeping in mind #2 likely has the most variance)
 ```
 
-```{r r exploratory_plots_5, include = FALSE, warning = FALSE, fig.cap = "Male Tail Length by Display System"}
+```{r r exploratory_plots_5, echo = FALSE, warning = FALSE, fig.cap = "Male Tail Length by Display System"}
 # Exploratory plot:
 # Boxplot of display system vs male tail length
 ggplot(birds.subset) +
   geom_boxplot(aes(x = Display, y = M_tail)) +
-  labs(y = "Male Tail Length (mm)")
+  labs(y = "Male Tail Length (mm)") +
+  scale_x_discrete(labels = c("Ground Displays", "Mostly Ground", "Ground & Aerial", "Aerial, Non-Acrobatic", "Aerial, Acrobatic", "NA"))
 # Display #5 appears higher than the others
 ```
 
-```{r exploratory_plots_6, include = FALSE, fig.cap = "Male Tail Length by Resource System"}
+```{r exploratory_plots_6, echo = FALSE, fig.cap = "Male Tail Length by Resource System"}
 # Exploratory plot:
 # Boxplot of resource system vs male tail length
 ggplot(birds.subset) +
   geom_boxplot(aes(x = Resource, y = M_tail)) +
-  labs(y = "Male Tail Length (mm)")
+  labs(y = "Male Tail Length (mm)") +
+  scale_x_discrete(labels = c("No Sharing", "Sharing While Breeding", "Resource Sharing", "NA"))
 # Resource #1 may be higher, but not much difference
 ```
 
