@@ -290,7 +290,8 @@ In preparation for the second part of our analysis, the following plots show the
 ggplot(birds.subset) +
   geom_boxplot(aes(x = Mating_System, y = M_tail)) +
   labs(y = "Male Tail Length (mm)", x = "Mating System") +
-  scale_x_discrete(labels = c("Polyandry", "Monogamy", "Mostly Monogamy", "Mostly Polygyny", "Promiscuous", "NA"))
+  scale_x_discrete(labels = c("Polyandry", "Monogamy", "Mostly Monogamy", "Mostly Polygyny", "Promiscuous", "NA")) +
+  theme(axis.text.x = element_text(angle=45, hjust = 1))
 # MS #5 appears higher and #1 appears lower (keeping in mind #2 likely has the most variance)
 ```
 
@@ -300,7 +301,8 @@ ggplot(birds.subset) +
 ggplot(birds.subset) +
   geom_boxplot(aes(x = Display, y = M_tail)) +
   labs(y = "Male Tail Length (mm)") +
-  scale_x_discrete(labels = c("Ground Displays", "Mostly Ground", "Ground & Aerial", "Aerial, Non-Acrobatic", "Aerial, Acrobatic", "NA"))
+  scale_x_discrete(labels = c("Ground Displays", "Mostly Ground", "Ground & Aerial", "Aerial, Non-Acrobatic", "Aerial, Acrobatic", "NA")) +
+  theme(axis.text.x = element_text(angle=45, hjust = 1))
 # Display #5 appears higher than the others
 ```
 
@@ -310,7 +312,8 @@ ggplot(birds.subset) +
 ggplot(birds.subset) +
   geom_boxplot(aes(x = Resource, y = M_tail)) +
   labs(y = "Male Tail Length (mm)") +
-  scale_x_discrete(labels = c("No Sharing", "Sharing While Breeding", "Resource Sharing", "NA"))
+  scale_x_discrete(labels = c("No Sharing", "Sharing While Breeding", "Resource Sharing", "NA")) +
+  theme(axis.text.x = element_text(angle=45, hjust = 1))
 # Resource #1 may be higher, but not much difference
 ```
 

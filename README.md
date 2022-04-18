@@ -24,7 +24,7 @@ This data set was found using www.ecologicaldata.org, an open source website for
 
 The folders contained within our repository split up our Code and our Data. The Code folder contains the R scripts used to complete analyses to answer our over arching research questions. The Data folder contains the original dataset (Raw folder) and our wrangled datasets (Processed folder).
 
-Files within our folders were kept only if relevant to avoid cluttering up our work space. Our `.Rproj` file created the workspace in which we worked through creating our final report. Code files were all written using RStudio and are therefore in `.Rmd` for easy sharing. Our project template is where analysis was conducted, while the project instructions .Rmd provided guidance for the project at large. 
+Files within our folders were kept only if relevant to avoid cluttering up our work space. Our `.Rproj` file created the workspace in which we worked through creating our final report. Code files were all written using RStudio and are therefore in `.Rmd` for easy sharing. The final PDF for this project can be found in the Output folder, alongside three figures. 
 
 Files are named conventionally, using the original file name for our raw data set that is associated with the `.txt` file in the Data/Raw folder. Processed data is named to distinguish it between the raw dataset and all file names will be explanatory as to the contents held within the file. For this project, `birds.subset` is the data frame used for analysis, which is saved as `birds_subset.csv` in the Data/Processed folder. 
 
