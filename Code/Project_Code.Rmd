@@ -169,7 +169,8 @@ ggpairs(birds.family, columns = 2:9)
 write.csv(birds.family, file = "../Data/Processed/birds_family.csv")
 ```
 
-\newpage
+  
+  
 # Exploration of Processed Data
 
 ```{r explore_processed_dataset, include = FALSE}
@@ -257,7 +258,7 @@ ggplot(birds.subset, aes(x = F_tail, y = M_tail)) +
 To visualize the relationship between male and female tail length another way, here are the distributions of tail length sorted by family and divided by sex. 
 
 
-```{r r exploratory_plots_1, echo = FALSE, warning = FALSE, fig.cap = "Exploratory Plots of Tail Length by Sex and Family"}
+```{r r exploratory_plots_1, echo = FALSE, warning = FALSE, message = FALSE, fig.cap = "Exploratory Plots of Tail Length by Sex and Family"}
 # Boxplot of families vs female tail
 plot.fam.ftail <- ggplot(birds.subset) +
   geom_boxplot(aes(x = Family, y = F_tail)) +
@@ -278,11 +279,12 @@ plot_grid(plot.fam.ftail, plot.fam.mtail)
 # In some families, males have longer tails and/or a broader range of tail lengths. The tail lengths in these families are probably more impacted by sexual selection compared with other families.
 ```
 
+\newpage
 ### Exploratory Plots for Part 2
 
 In preparation for the second part of our analysis, the following plots show the distribution of male tail length according to each behavioral variable: mating system, display system, and resource system.
 
-```{r r exploratory_plots_4, echo = FALSE, warning = FALSE, fig.cap = "Male Tail Length by Mating System"}
+```{r r exploratory_plots_4, echo = FALSE, warning = FALSE, message = FALSE, fig.cap = "Male Tail Length by Mating System"}
 # Exploratory plot:
 # Boxplot of mating system vs male tail length
 ggplot(birds.subset) +
@@ -292,7 +294,7 @@ ggplot(birds.subset) +
 # MS #5 appears higher and #1 appears lower (keeping in mind #2 likely has the most variance)
 ```
 
-```{r r exploratory_plots_5, echo = FALSE, warning = FALSE, fig.cap = "Male Tail Length by Display System"}
+```{r r exploratory_plots_5, echo = FALSE, warning = FALSE, message = FALSE, fig.cap = "Male Tail Length by Display System"}
 # Exploratory plot:
 # Boxplot of display system vs male tail length
 ggplot(birds.subset) +
@@ -302,7 +304,7 @@ ggplot(birds.subset) +
 # Display #5 appears higher than the others
 ```
 
-```{r exploratory_plots_6, echo = FALSE, fig.cap = "Male Tail Length by Resource System"}
+```{r exploratory_plots_6, echo = FALSE, warning = FALSE, message = FALSE, fig.cap = "Male Tail Length by Resource System"}
 # Exploratory plot:
 # Boxplot of resource system vs male tail length
 ggplot(birds.subset) +
